@@ -537,8 +537,7 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
         LOG_E("No device connection!");
         return RT_NULL;
     default:
-        LOG_E("Unsupported devices: 0x%x!", reg);
-        return RT_NULL;
+        LOG_W("Unknown device id: 0x%x!", reg);
     }
 
     mpu6xxx_get_param(dev, MPU6XXX_ACCEL_RANGE, &dev->config.accel_range);
