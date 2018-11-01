@@ -8,15 +8,30 @@
  * 2018-10-23     flybreak     the first version
  */
 
-#include <mpu6xxx.h>
-#include <mpu6xxx_reg.h>
+#include <rtthread.h>
 #include <rtdevice.h>
 
+#include <string.h>
+#include <stdlib.h>
+
 #define DBG_ENABLE
-#define DBG_SECTION_NAME "mpu6xxx"
+#define DBG_SECTION_NAME "MPU6XXX"
 #define DBG_LEVEL DBG_LOG
 #define DBG_COLOR
 #include <rtdbg.h>
+
+#include "mpu6xxx.h"
+#include "mpu6xxx_reg.h"
+
+#define MPU6XXX_ACCEL_SEN     (16384)
+#define MPU6XXX_GYRO_SEN      (1310)
+
+#define MPU60X0_SPI_MAX_SPEED (1000 * 1000)
+#define MPU60X0_TEMP_SEN      (340)
+#define MPU60X0_TEMP_OFFSET   (36.5)
+
+#define MPU6500_TEMP_SEN      (333.87)
+#define MPU6500_TEMP_OFFSET   (21)
 
 /**
  * This function writes the value of the register for mpu6xxx
@@ -316,6 +331,7 @@ static rt_err_t mpu6xxx_get_param(struct mpu6xxx_device *dev, enum mpu6xxx_cmd c
 
     return RT_EOK;
 }
+
 /**
  * This function set mpu6xxx parameters.
  *
@@ -397,16 +413,16 @@ rt_err_t mpu6xxx_get_accel(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *acc
     switch (dev->config.accel_range)
     {
     case MPU6XXX_ACCEL_RANGE_2G:
-        sen = 16384;
+        sen = MPU6XXX_ACCEL_SEN;
         break;
     case MPU6XXX_ACCEL_RANGE_4G:
-        sen = 8192;
+        sen = MPU6XXX_ACCEL_SEN / 2;
         break;
     case MPU6XXX_ACCEL_RANGE_8G:
-        sen = 4096;
+        sen = MPU6XXX_ACCEL_SEN / 2 / 2;
         break;
     case MPU6XXX_ACCEL_RANGE_16G:
-        sen = 2048;
+        sen = MPU6XXX_ACCEL_SEN / 2 / 2 / 2;
         break;
     }
 
@@ -435,16 +451,16 @@ rt_err_t mpu6xxx_get_gyro(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *gyro
     switch (dev->config.gyro_range)
     {
     case MPU6XXX_GYRO_RANGE_250DPS:
-        sen = 1310;
+        sen = MPU6XXX_GYRO_SEN;
         break;
     case MPU6XXX_GYRO_RANGE_500DPS:
-        sen = 655;
+        sen = MPU6XXX_GYRO_SEN / 2;
         break;
     case MPU6XXX_GYRO_RANGE_1000DPS:
-        sen = 328;
+        sen = MPU6XXX_GYRO_SEN / 2 / 2;
         break;
     case MPU6XXX_GYRO_RANGE_2000DPS:
-        sen = 164;
+        sen = MPU6XXX_GYRO_SEN / 2 / 2 / 2;
         break;
     }
     gyro->x = (rt_int32_t)tmp.x * 100 / sen;
@@ -468,8 +484,16 @@ rt_err_t mpu6xxx_get_temp(struct mpu6xxx_device *dev, float *temp)
 
     mpu6xxx_get_temp_raw(dev, &tmp);
 
-    /* mpu60x0: Temperature in degrees C = (TEMP_OUT Register Value as a signed quantity)/340 + 36.53 */
-    *temp = (double)tmp / 340 + 36.53;
+    if (dev->id == MPU6050_WHO_AM_I)
+    {
+        /* mpu60x0: Temperature in degrees C = (TEMP_OUT Register Value as a signed quantity)/340 + 36.53 */
+        *temp = (double)tmp / MPU60X0_TEMP_SEN + MPU60X0_TEMP_OFFSET;
+    }
+    else
+    {
+        /* mpu6500:  ((TEMP_OUT – RoomTemp_Offset)/Temp_Sensitivity)+ 21degC */
+        *temp = (double)tmp / MPU6500_TEMP_SEN + MPU6500_TEMP_OFFSET;
+    }
 
     return RT_EOK;
 }
@@ -478,14 +502,14 @@ rt_err_t mpu6xxx_get_temp(struct mpu6xxx_device *dev, float *temp)
  * This function initialize the mpu6xxx device.
  *
  * @param dev_name the name of transfer device
- * @param param the i2c device address for i2c communication
  *
  * @return the pointer of device driver structure, RT_NULL reprensents  initialization failed.
  */
-struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
+struct mpu6xxx_device *mpu6xxx_init(const char *dev_name)
 {
     struct mpu6xxx_device *dev = RT_NULL;
     rt_uint8_t reg = 0xFF;
+
     RT_ASSERT(dev_name);
 
     dev = rt_calloc(1, sizeof(struct mpu6xxx_device));
@@ -508,7 +532,30 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
 
     if (dev->bus->type == RT_Device_Class_I2CBUS)
     {
-        dev->i2c_addr = param;
+        /* find mpu6xxx device at address: 0x68 */
+        dev->i2c_addr = MPU6XXX_ADDRESS_AD0_LOW;
+        if (mpu6xxx_read_regs(dev, MPU6XXX_RA_WHO_AM_I, 1, &reg) != RT_EOK)
+        {
+            /* find mpu6xxx device at address 0x69 */
+            dev->i2c_addr = MPU6XXX_ADDRESS_AD0_HIGH;
+            if (mpu6xxx_read_regs(dev, MPU6XXX_RA_WHO_AM_I, 1, &reg) != RT_EOK)
+            {
+                LOG_E("Can't find device at '%s'!", dev_name);
+                return RT_NULL;
+            }
+        }
+    }
+    else if (dev->bus->type == RT_Device_Class_SPIDevice)
+    {
+#ifdef RT_USING_SPI
+        struct rt_spi_configuration cfg;
+
+        cfg.data_width = 8;
+        cfg.mode = RT_SPI_MASTER | RT_SPI_MODE_0 | RT_SPI_MSB;
+        cfg.max_hz = MPU60X0_SPI_MAX_SPEED; /* Set spi max speed */
+
+        rt_spi_configure((struct rt_spi_device *)dev->bus, &cfg);
+#endif
     }
 
     if (mpu6xxx_read_regs(dev, MPU6XXX_RA_WHO_AM_I, 1, &reg) != RT_EOK)
@@ -548,5 +595,106 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
     mpu6xxx_set_param(dev, MPU6XXX_ACCEL_RANGE, MPU6XXX_ACCEL_RANGE_2G);
     mpu6xxx_set_param(dev, MPU6XXX_SLEEP, MPU6XXX_SLEEP_DISABLE);
 
+    LOG_I("mpu6xxx init succeed");
+
     return dev;
 }
+
+/**
+ * This function releases memory
+ *
+ * @param dev the pointer of device driver structure
+ */
+void mpu6xxx_deinit(struct mpu6xxx_device *dev)
+{
+    RT_ASSERT(dev);
+
+    rt_free(dev);
+}
+
+static void mpu6xxx(int argc, char **argv)
+{
+    static struct mpu6xxx_device *dev = RT_NULL;
+
+    /* If the number of arguments less than 2 */
+    if (argc < 2)
+    {
+        rt_kprintf("\n");
+        rt_kprintf("mpu6xxx [OPTION] [PARAM]\n");
+        rt_kprintf("         probe <dev_name>      Probe mpu6xxx by given name\n");
+        rt_kprintf("         sr <var>              Set sample rate to var\n");
+        rt_kprintf("                               var = [1000 -  4] when dlpf is enable\n");
+        rt_kprintf("                               var = [8000 - 32] when dlpf is disable\n");
+        rt_kprintf("         gr <var>              Set gyro range to var\n");
+        rt_kprintf("                               var = [0 - 3] means [250 - 2000DPS]\n");
+        rt_kprintf("         ar <var>              Set accel range to var\n");
+        rt_kprintf("                               var = [0 - 3] means [2 - 16G]\n");
+        rt_kprintf("         sleep <var>           Set sleep status\n");
+        rt_kprintf("                               var = 0 means disable, = 1 means enable\n");
+        rt_kprintf("         read [num]            read [num] times mpu6xxx\n");
+        rt_kprintf("                               num default 5\n");
+        return ;
+    }
+    else if (!strcmp(argv[1], "read"))
+    {
+        struct mpu6xxx_3axes accel, gyro;
+        float temp;
+        uint16_t num = 5;
+
+        if (dev == RT_NULL)
+        {
+            rt_kprintf("Please probe mpu6xxx first!\n");
+            return ;
+        }
+        if (argc == 3)
+        {
+            num = atoi(argv[2]);
+        }
+
+        while (num --)
+        {
+            mpu6xxx_get_accel(dev, &accel);
+            mpu6xxx_get_gyro(dev, &gyro);
+            mpu6xxx_get_temp(dev, &temp);
+
+            rt_kprintf("accel.x = %3d, accel.y = %3d, accel.z = %3d ", accel.x, accel.y, accel.z);
+            rt_kprintf("gyro.x = %3d gyro.y = %3d, gyro.z = %3d, ", gyro.x, gyro.y, gyro.z);
+            rt_kprintf("temp = %d.%d\n", (int)(temp * 100) / 100, (int)(temp * 100) % 100);
+
+            rt_thread_mdelay(100);
+        }
+    }
+    else if (argc == 3)
+    {
+        if (!strcmp(argv[1], "probe"))
+        {
+            if (dev)
+            {
+                mpu6xxx_deinit(dev);
+            }
+            dev = mpu6xxx_init(argv[2]);
+        }
+        else if (dev == RT_NULL)
+        {
+            rt_kprintf("Please probe mpu6xxx first!\n");
+            return ;
+        }
+        else if (!strcmp(argv[1], "sr"))
+        {
+            mpu6xxx_set_param(dev, MPU6XXX_SAMPLE_RATE, atoi(argv[2]));
+        }
+        else if (!strcmp(argv[1], "sleep"))
+        {
+            mpu6xxx_set_param(dev, MPU6XXX_SLEEP, atoi(argv[2]));
+        }
+        else if (!strcmp(argv[1], "gr"))
+        {
+            mpu6xxx_set_param(dev, MPU6XXX_GYRO_RANGE, atoi(argv[2]));
+        }
+        else if (!strcmp(argv[1], "ar"))
+        {
+            mpu6xxx_set_param(dev, MPU6XXX_ACCEL_RANGE, atoi(argv[2]));
+        }
+    }
+}
+MSH_CMD_EXPORT(mpu6xxx, mpu6xxx sensor function);
