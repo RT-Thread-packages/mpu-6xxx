@@ -2,7 +2,7 @@
 
 ## 简介
 
-这是一个 mpu6xxx 驱动库的软件包，兼容 mpu6000、mpu6050、mpu6500、mpu9250、icm20608等芯片。
+这是一个支持 IIC、SPI 的 mpu6xxx 驱动库的软件包，兼容 mpu6000、mpu6050、mpu6500、mpu9250、icm20608等芯片。
 
 ### 目录结构
 
@@ -14,8 +14,7 @@ mpu6xxx
 ├───docs 
 │   |   api.md                      // API 使用说明
 ├───samples                         // 示例代码
-│   |   mpu6xxx_sample_i2c.c        // 软件包i2c使用示例代码
-│   |   mpu6xxx_sample_spi.c        // 软件包spi使用示例代码
+│   |   mpu6xxx_sample.c            // 软件包使用示例代码
 └───src                             // 源文件
 └───inc                             // 头文件
 ```
@@ -43,14 +42,11 @@ RT-Thread online packages
 
 ```
     --- mpu6xxx: Universal 6-axis sensor driver library                           
-        [*]   Enable mpu6xxx i2c sample 
-        [*]   Enable mpu6xxx spi sample		
-           Version (latest)  --->                           
+        [*]   Enable mpu6xxx sample
+           Version (latest)  --->
 ```
 
-**Enable mpu6xxx i2c sample** ：开启 mpu6xxx i2c 使用示例
-
-**Enable mpu6xxx spi sample** ：开启 mpu6xxx spi 使用示例
+**Enable mpu6xxx sample** ：开启 mpu6xxx  使用示例
 
 配置完成后让 RT-Thread 的包管理器自动更新，或者使用 pkgs --update 命令更新包到 BSP 中。
 
@@ -59,14 +55,10 @@ RT-Thread online packages
 mpu6xxx 软件包的使用流程一般如下：
 
 1. 初始化 mpu6xxx 设备 `mpu6xxx_init`
-2. 配置相关参数 `mpu6xxx_set_param`
+2. 配置相关参数 `mpu6xxx_set_param` (也可以不调用，使用默认参数)
 3. 读取传感器数据 `mpu6xxx_get_gyro/accel/temp`
 
-使用 i2c 通信的请参考 [mpu6xxx i2c 示例程序](samples/mpu6xxx_sample_i2c.c) 。
-
-使用 spi 通信的请参考 [mpu6xxx spi 示例程序](samples/mpu6xxx_sample_spi.c) 。
-
-详细的使用方法可以参考 [API 说明文档](doc/api.md)。
+详细的使用方法可以参考[mpu6xxx 示例程序](samples/mpu6xxx_sample.c) 和 [API 说明文档](doc/api.md)。
 
 ## 联系方式
 
