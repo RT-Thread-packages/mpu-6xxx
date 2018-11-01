@@ -557,6 +557,11 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name)
         rt_spi_configure((struct rt_spi_device *)dev->bus, &cfg);
 #endif
     }
+    else
+    {
+        LOG_E("Unsupported device:'%s'!", dev_name);
+        return RT_NULL;
+    }
 
     if (mpu6xxx_read_regs(dev, MPU6XXX_RA_WHO_AM_I, 1, &reg) != RT_EOK)
     {
@@ -697,4 +702,6 @@ static void mpu6xxx(int argc, char **argv)
         }
     }
 }
+#ifdef FINSH_USING_MSH
 MSH_CMD_EXPORT(mpu6xxx, mpu6xxx sensor function);
+#endif
