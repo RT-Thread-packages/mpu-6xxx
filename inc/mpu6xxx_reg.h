@@ -366,4 +366,3 @@
 #define MPU6XXX_DMP_MEMORY_CHUNK_SIZE   16
 
 #endif
-
