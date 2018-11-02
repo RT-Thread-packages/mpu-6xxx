@@ -8,11 +8,8 @@ cwd   = GetCurrentDir()
 if GetDepend('PKG_USING_MPU6XXX'):
     src += Glob('src/mpu6xxx.c')
 
-if GetDepend('PKG_USING_MPU6XXX_SAMPLE_I2C'):
-    src += Glob('samples/mpu6xxx_sample_i2c.c')
-
-if GetDepend('PKG_USING_MPU6XXX_SAMPLE_SPI'):
-    src += Glob('samples/mpu6xxx_sample_spi.c')
+if GetDepend('PKG_USING_MPU6XXX_SAMPLE'):
+    src += Glob('samples/mpu6xxx_sample.c')
 
 # add mpu6xxx include path.
 path  = [cwd + '/inc']

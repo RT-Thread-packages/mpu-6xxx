@@ -410,21 +410,7 @@ rt_err_t mpu6xxx_get_accel(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *acc
 
     mpu6xxx_get_accel_raw(dev, &tmp);
 
-    switch (dev->config.accel_range)
-    {
-    case MPU6XXX_ACCEL_RANGE_2G:
-        sen = MPU6XXX_ACCEL_SEN;
-        break;
-    case MPU6XXX_ACCEL_RANGE_4G:
-        sen = MPU6XXX_ACCEL_SEN / 2;
-        break;
-    case MPU6XXX_ACCEL_RANGE_8G:
-        sen = MPU6XXX_ACCEL_SEN / 2 / 2;
-        break;
-    case MPU6XXX_ACCEL_RANGE_16G:
-        sen = MPU6XXX_ACCEL_SEN / 2 / 2 / 2;
-        break;
-    }
+    sen = MPU6XXX_ACCEL_SEN >> dev->config.accel_range;
 
     accel->x = (rt_int32_t)tmp.x * 1000 / sen;
     accel->y = (rt_int32_t)tmp.y * 1000 / sen;
@@ -448,21 +434,8 @@ rt_err_t mpu6xxx_get_gyro(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *gyro
 
     mpu6xxx_get_gyro_raw(dev, &tmp);
 
-    switch (dev->config.gyro_range)
-    {
-    case MPU6XXX_GYRO_RANGE_250DPS:
-        sen = MPU6XXX_GYRO_SEN;
-        break;
-    case MPU6XXX_GYRO_RANGE_500DPS:
-        sen = MPU6XXX_GYRO_SEN / 2;
-        break;
-    case MPU6XXX_GYRO_RANGE_1000DPS:
-        sen = MPU6XXX_GYRO_SEN / 2 / 2;
-        break;
-    case MPU6XXX_GYRO_RANGE_2000DPS:
-        sen = MPU6XXX_GYRO_SEN / 2 / 2 / 2;
-        break;
-    }
+    sen = MPU6XXX_GYRO_SEN >> dev->config.gyro_range;
+
     gyro->x = (rt_int32_t)tmp.x * 100 / sen;
     gyro->y = (rt_int32_t)tmp.y * 100 / sen;
     gyro->z = (rt_int32_t)tmp.z * 100 / sen;
@@ -517,18 +490,14 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
     if (dev == RT_NULL)
     {
         LOG_E("Can't allocate memory for mpu6xxx device on '%s' ", dev_name);
-        rt_free(dev);
-
-        return RT_NULL;
+        goto __exit;
     }
 
     dev->bus = rt_device_find(dev_name);
     if (dev->bus == RT_NULL)
     {
         LOG_E("Can't find device:'%s'", dev_name);
-        rt_free(dev);
-
-        return RT_NULL;
+        goto __exit;
     }
 
     if (dev->bus->type == RT_Device_Class_I2CBUS)
@@ -548,7 +517,7 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
                 if (mpu6xxx_read_regs(dev, MPU6XXX_RA_WHO_AM_I, 1, &reg) != RT_EOK)
                 {
                     LOG_E("Can't find device at '%s'!", dev_name);
-                    return RT_NULL;
+                    goto __exit;
                 }
             }
             LOG_I("Device i2c address is:'0x%x'!", dev->i2c_addr);
@@ -569,13 +538,13 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
     else
     {
         LOG_E("Unsupported device:'%s'!", dev_name);
-        return RT_NULL;
+        goto __exit;
     }
 
     if (mpu6xxx_read_regs(dev, MPU6XXX_RA_WHO_AM_I, 1, &reg) != RT_EOK)
     {
         LOG_E("Failed to read device id!");
-        return RT_NULL;
+        goto __exit;
     }
 
     dev->id = reg;
@@ -596,7 +565,7 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
         break;
     case 0xFF:
         LOG_E("No device connection!");
-        return RT_NULL;
+        goto __exit;
     default:
         LOG_W("Unknown device id: 0x%x!", reg);
     }
@@ -612,6 +581,13 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
     LOG_I("mpu6xxx init succeed!");
 
     return dev;
+
+__exit:
+    if (dev != RT_NULL)
+    {
+        rt_free(dev);
+    }
+    return RT_NULL;
 }
 
 /**
@@ -720,5 +696,5 @@ static void mpu6xxx(int argc, char **argv)
     }
 }
 #ifdef FINSH_USING_MSH
-MSH_CMD_EXPORT(mpu6xxx, mpu6xxx sensor function);
+    MSH_CMD_EXPORT(mpu6xxx, mpu6xxx sensor function);
 #endif

@@ -1,6 +1,6 @@
 # API 说明
 
-在 RT-Thread 上编程，需要用到 mpu6000/6050/6500/9250 6 轴芯片时，使用 mpu6xxx 库就可以轻松完成芯片的配置以及芯片数据的读取，本章介绍 mpu6xxx 库提供的常用 API。
+在 RT-Thread 上编程，需要用到 mpu6000/6050/6500/9250/icm20608 等 6 轴传感器时，使用 mpu6xxx 软件包就可以轻松完成传感器的配置以及传感器数据的读取，本章介绍 mpu6xxx 软件包提供的常用 API。
 
 ### 初始化函数
 
@@ -8,12 +8,12 @@
 struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param);
 ```
 
-使用指定的通信设备（IIC/SPI）初始化mpu6xxx ，并返回控制句柄。
+使用指定的通信设备（I2C/SPI）初始化mpu6xxx ，并返回控制句柄。
 
 | 参数              | 描述                                |
 |:------------------|:------------------------------------|
-|dev_name               | 用于同 mpu6xxx 通信的设备名（支持 IIC 总线设备和 SPI 设备） |
-|param | IIC 通信，根据此处传入的 IIC 地址寻找设备（例如：0x68） |
+|dev_name               | 用于同 mpu6xxx 通信的设备名（支持 I2C 总线设备和 SPI 设备） |
+|param | I2C 通信，根据此处传入的 I2C 地址寻找设备（例如：0x68） |
 | **返回**          | **描述**                                |
 |struct mpu6xxx_device *                  | mpu6xxx_device 结构体的指针，它在调用 mpu6xxx 库的其他函数时使用 |
 |NULL                 | 失败                                |

@@ -2,7 +2,7 @@
 
 ## 介绍
 
-`mpu6xxx` 软件包是 RT-Thread 针对 InvenSense 公司的六轴系列传感器推出的一个软件包，兼容 mpu6000、mpu6050、mpu6500、mpu9250、icm20608 等芯片。使用这个软件包，可以在 RT-Thread 上非常方便的使用该系列传感器，实现参数的配置和数据的读取——包括读取三轴加速度（3-axis accelerometer）、三轴陀螺仪（3-axis gyroscope）和温度值。
+`mpu6xxx` 软件包是 RT-Thread 针对 InvenSense 公司的六轴系列传感器推出的一个软件包，兼容 mpu6000、mpu6050、mpu6500、mpu9250、icm20608 等传感器。使用这个软件包，可以在 RT-Thread 上非常方便的使用该系列传感器，实现参数的配置和数据的读取——包括读取三轴加速度（3-axis accelerometer）、三轴陀螺仪（3-axis gyroscope）和温度值。
 
 软件包具有以下优点：
 
