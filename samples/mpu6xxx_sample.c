@@ -21,8 +21,8 @@ static int mpu6xxx_test()
     struct mpu6xxx_3axes accel, gyro;
     int i;
 
-    /* Initialize mpu6xxx, incoming RT_NULL for spi communication */
-    dev = mpu6xxx_init(MPU6XXX_DEVICE_NAME);
+    /* Initialize mpu6xxx, The parameter is RT_NULL, means auto probing for i2c*/
+    dev = mpu6xxx_init(MPU6XXX_DEVICE_NAME, RT_NULL);
 
     if (dev == RT_NULL)
     {

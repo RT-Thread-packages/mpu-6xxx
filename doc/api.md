@@ -13,6 +13,7 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param);
 | 参数              | 描述                                |
 |:------------------|:------------------------------------|
 |dev_name               | 用于同 mpu6xxx 通信的设备名（支持 IIC 总线设备和 SPI 设备） |
+|param | IIC 通信，根据此处传入的 IIC 地址寻找设备（例如：0x68） |
 | **返回**          | **描述**                                |
 |struct mpu6xxx_device *                  | mpu6xxx_device 结构体的指针，它在调用 mpu6xxx 库的其他函数时使用 |
 |NULL                 | 失败                                |

@@ -90,10 +90,11 @@ struct mpu6xxx_device
  * This function initialize the mpu6xxx device.
  *
  * @param dev_name the name of transfer device
+ * @param param the i2c device address for i2c communication, RT_NULL for spi
  *
  * @return the pointer of device driver structure, RT_NULL reprensents  initialization failed.
  */
-struct mpu6xxx_device *mpu6xxx_init(const char *dev_name);
+struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param);
 
 /**
  * This function releases memory

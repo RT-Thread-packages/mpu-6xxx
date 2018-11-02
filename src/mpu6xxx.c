@@ -502,10 +502,11 @@ rt_err_t mpu6xxx_get_temp(struct mpu6xxx_device *dev, float *temp)
  * This function initialize the mpu6xxx device.
  *
  * @param dev_name the name of transfer device
+ * @param param the i2c device address for i2c communication, RT_NULL for spi
  *
  * @return the pointer of device driver structure, RT_NULL reprensents  initialization failed.
  */
-struct mpu6xxx_device *mpu6xxx_init(const char *dev_name)
+struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
 {
     struct mpu6xxx_device *dev = RT_NULL;
     rt_uint8_t reg = 0xFF;
@@ -532,17 +533,25 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name)
 
     if (dev->bus->type == RT_Device_Class_I2CBUS)
     {
-        /* find mpu6xxx device at address: 0x68 */
-        dev->i2c_addr = MPU6XXX_ADDRESS_AD0_LOW;
-        if (mpu6xxx_read_regs(dev, MPU6XXX_RA_WHO_AM_I, 1, &reg) != RT_EOK)
+        if (param != RT_NULL)
         {
-            /* find mpu6xxx device at address 0x69 */
-            dev->i2c_addr = MPU6XXX_ADDRESS_AD0_HIGH;
+            dev->i2c_addr = param;
+        }
+        else
+        {
+            /* find mpu6xxx device at address: 0x68 */
+            dev->i2c_addr = MPU6XXX_ADDRESS_AD0_LOW;
             if (mpu6xxx_read_regs(dev, MPU6XXX_RA_WHO_AM_I, 1, &reg) != RT_EOK)
             {
-                LOG_E("Can't find device at '%s'!", dev_name);
-                return RT_NULL;
+                /* find mpu6xxx device at address 0x69 */
+                dev->i2c_addr = MPU6XXX_ADDRESS_AD0_HIGH;
+                if (mpu6xxx_read_regs(dev, MPU6XXX_RA_WHO_AM_I, 1, &reg) != RT_EOK)
+                {
+                    LOG_E("Can't find device at '%s'!", dev_name);
+                    return RT_NULL;
+                }
             }
+            LOG_I("Device i2c address is:'0x%x'!", dev->i2c_addr);
         }
     }
     else if (dev->bus->type == RT_Device_Class_SPIDevice)
@@ -600,7 +609,7 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name)
     mpu6xxx_set_param(dev, MPU6XXX_ACCEL_RANGE, MPU6XXX_ACCEL_RANGE_2G);
     mpu6xxx_set_param(dev, MPU6XXX_SLEEP, MPU6XXX_SLEEP_DISABLE);
 
-    LOG_I("mpu6xxx init succeed");
+    LOG_I("mpu6xxx init succeed!");
 
     return dev;
 }
@@ -677,7 +686,7 @@ static void mpu6xxx(int argc, char **argv)
             {
                 mpu6xxx_deinit(dev);
             }
-            dev = mpu6xxx_init(argv[2]);
+            dev = mpu6xxx_init(argv[2], RT_NULL);
         }
         else if (dev == RT_NULL)
         {
@@ -700,6 +709,14 @@ static void mpu6xxx(int argc, char **argv)
         {
             mpu6xxx_set_param(dev, MPU6XXX_ACCEL_RANGE, atoi(argv[2]));
         }
+        else
+        {
+            rt_kprintf("Unknown command, please enter 'mpu6xxx' get help information!\n");
+        }
+    }
+    else
+    {
+        rt_kprintf("Unknown command, please enter 'mpu6xxx' get help information!\n");
     }
 }
 #ifdef FINSH_USING_MSH
