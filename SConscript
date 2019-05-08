@@ -8,6 +8,9 @@ cwd   = GetCurrentDir()
 if GetDepend('PKG_USING_MPU6XXX'):
     src += Glob('src/mpu6xxx.c')
 
+if GetDepend('RT_USING_SENSOR'):
+    src += Glob('src/sensor_inven_mpu6xxx.c')
+
 if GetDepend('PKG_USING_MPU6XXX_SAMPLE'):
     src += Glob('samples/mpu6xxx_sample.c')
 
