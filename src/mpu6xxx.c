@@ -14,10 +14,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define DBG_ENABLE
-#define DBG_SECTION_NAME "MPU6XXX"
-#define DBG_LEVEL DBG_LOG
-#define DBG_COLOR
+#define DBG_TAG "MPU6XXX"
+#define DBG_LVL DBG_LOG
 #include <rtdbg.h>
 
 #include "mpu6xxx.h"
