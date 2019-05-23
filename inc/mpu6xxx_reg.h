@@ -14,8 +14,9 @@
 #define MPU6050_WHO_AM_I                        0x68 // value of WHO_AM_I register of mpu6050
 #define MPU6500_WHO_AM_I                        0x70 // value of WHO_AM_I register of mpu6500
 #define MPU9250_WHO_AM_I                        0x71 // value of WHO_AM_I register of mpu9250
-#define ICM20608_WHO_AM_I                       0xAF // value of WHO_AM_I register of icm20608
-                                                
+#define ICM20608G_WHO_AM_I                      0xAF // value of WHO_AM_I register of icm20608G
+#define ICM20608D_WHO_AM_I                      0xAE // value of WHO_AM_I register of icm20608D
+
 #define MPU6XXX_ADDRESS_AD0_LOW                 0x68 // address pin low (GND), default for InvenSense evaluation board
 #define MPU6XXX_ADDRESS_AD0_HIGH                0x69 // address pin high (VCC)
                                                 

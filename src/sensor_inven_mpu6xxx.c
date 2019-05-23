@@ -45,9 +45,9 @@ static rt_err_t _mpu6xxx_set_range(rt_sensor_t sensor, rt_int32_t range)
         else
             range_ctr = MPU6XXX_ACCEL_RANGE_16G;
 
-        mpu6xxx_set_param(mpu_dev, MPU6XXX_ACCEL_RANGE, range_ctr);
-
         LOG_D("acce set range %d", range_ctr);
+
+        return mpu6xxx_set_param(mpu_dev, MPU6XXX_ACCEL_RANGE, range_ctr);
     }
     else if (sensor->info.type == RT_SENSOR_CLASS_GYRO)
     {
@@ -62,11 +62,10 @@ static rt_err_t _mpu6xxx_set_range(rt_sensor_t sensor, rt_int32_t range)
         else
             range_ctr = MPU6XXX_GYRO_RANGE_2000DPS;
 
-        mpu6xxx_set_param(mpu_dev, MPU6XXX_GYRO_RANGE, range_ctr);
-
         LOG_D("gyro set range %d", range);
-    }
 
+        return mpu6xxx_set_param(mpu_dev, MPU6XXX_GYRO_RANGE, range_ctr);
+    }
     return RT_EOK;
 }
 
@@ -96,23 +95,22 @@ static rt_err_t _mpu6xxx_set_power(rt_sensor_t sensor, rt_uint8_t power)
         }
         if (ref_count == 0)
         {
-            mpu6xxx_set_param(mpu_dev, MPU6XXX_SLEEP, MPU6XXX_SLEEP_ENABLE);
             LOG_D("set power down");
+            return mpu6xxx_set_param(mpu_dev, MPU6XXX_SLEEP, MPU6XXX_SLEEP_ENABLE);
         }
+        return RT_EOK;
     }
     else if (power == RT_SENSOR_POWER_NORMAL)
     {
         ref_count ++;
-        mpu6xxx_set_param(mpu_dev, MPU6XXX_SLEEP, MPU6XXX_SLEEP_DISABLE);
-
         LOG_D("set power normal");
+        return mpu6xxx_set_param(mpu_dev, MPU6XXX_SLEEP, MPU6XXX_SLEEP_DISABLE);
     }
     else
     {
         LOG_W("Unsupported mode, code is %d", power);
         return -RT_ERROR;
     }
-    return RT_EOK;
 }
 
 static rt_size_t _mpu6xxx_polling_get_data(rt_sensor_t sensor, struct rt_sensor_data *data)
@@ -120,7 +118,10 @@ static rt_size_t _mpu6xxx_polling_get_data(rt_sensor_t sensor, struct rt_sensor_
     if (sensor->info.type == RT_SENSOR_CLASS_ACCE)
     {
         struct mpu6xxx_3axes acce;
-        mpu6xxx_get_accel(mpu_dev, &acce);
+        if (mpu6xxx_get_accel(mpu_dev, &acce) != RT_EOK)
+        {
+            return 0;
+        }
 
         data->type = RT_SENSOR_CLASS_ACCE;
         data->data.acce.x = acce.x;
@@ -131,7 +132,10 @@ static rt_size_t _mpu6xxx_polling_get_data(rt_sensor_t sensor, struct rt_sensor_
     else if (sensor->info.type == RT_SENSOR_CLASS_GYRO)
     {
         struct mpu6xxx_3axes gyro;
-        mpu6xxx_get_gyro(mpu_dev, &gyro);
+        if (mpu6xxx_get_gyro(mpu_dev, &gyro) != RT_EOK)
+        {
+            return 0;
+        }
 
         data->type = RT_SENSOR_CLASS_GYRO;
         data->data.gyro.x = gyro.x * 100;

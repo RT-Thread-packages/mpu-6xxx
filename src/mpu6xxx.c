@@ -14,8 +14,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define DBG_TAG "MPU6XXX"
-#define DBG_LVL DBG_LOG
+#define DBG_TAG "mpu6xxx"
+#define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
 #include "mpu6xxx.h"
@@ -141,8 +141,14 @@ static rt_err_t mpu6xxx_read_regs(struct mpu6xxx_device *dev, rt_uint8_t reg, rt
 static rt_err_t mpu6xxx_write_bit(struct mpu6xxx_device *dev, rt_uint8_t reg, rt_uint8_t bit, rt_uint8_t data)
 {
     rt_uint8_t byte;
+    rt_err_t res;
 
-    mpu6xxx_read_regs(dev, reg, 1, &byte);
+    res = mpu6xxx_read_regs(dev, reg, 1, &byte);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
+
     byte = (data != 0) ? (byte | (1 << bit)) : (byte & ~(1 << bit));
 
     return mpu6xxx_write_reg(dev, reg, byte);
@@ -161,8 +167,14 @@ static rt_err_t mpu6xxx_write_bit(struct mpu6xxx_device *dev, rt_uint8_t reg, rt
 static rt_err_t mpu6xxx_read_bit(struct mpu6xxx_device *dev, rt_uint8_t reg, rt_uint8_t bit, rt_uint8_t *data)
 {
     rt_uint8_t byte;
+    rt_err_t res;
 
-    mpu6xxx_read_regs(dev, reg, 1, &byte);
+    res = mpu6xxx_read_regs(dev, reg, 1, &byte);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
+
     *data = byte & (1 << bit);
 
     return RT_EOK;
@@ -182,8 +194,14 @@ static rt_err_t mpu6xxx_read_bit(struct mpu6xxx_device *dev, rt_uint8_t reg, rt_
 static rt_err_t mpu6xxx_write_bits(struct mpu6xxx_device *dev, rt_uint8_t reg, rt_uint8_t start_bit, rt_uint8_t len, rt_uint8_t data)
 {
     rt_uint8_t byte, mask;
+    rt_err_t res;
 
-    mpu6xxx_read_regs(dev, reg, 1, &byte);
+    res = mpu6xxx_read_regs(dev, reg, 1, &byte);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
+
     mask = ((1 << len) - 1) << (start_bit - len + 1);
     data <<= (start_bit - len + 1); // shift data into correct position
     data &= mask; // zero all non-important bits in data
@@ -207,12 +225,19 @@ static rt_err_t mpu6xxx_write_bits(struct mpu6xxx_device *dev, rt_uint8_t reg, r
 static rt_err_t mpu6xxx_read_bits(struct mpu6xxx_device *dev, rt_uint8_t reg, rt_uint8_t start_bit, rt_uint8_t len, rt_uint8_t *data)
 {
     rt_uint8_t byte, mask;
+    rt_err_t res;
 
-    mpu6xxx_read_regs(dev, reg, 1, &byte);
+    res = mpu6xxx_read_regs(dev, reg, 1, &byte);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
+
     mask = ((1 << len) - 1) << (start_bit - len + 1);
     byte &= mask;
     byte >>= (start_bit - len + 1);
     *data = byte;
+
     return RT_EOK;
 }
 
@@ -227,8 +252,13 @@ static rt_err_t mpu6xxx_read_bits(struct mpu6xxx_device *dev, rt_uint8_t reg, rt
 static rt_err_t mpu6xxx_get_accel_raw(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *accel)
 {
     rt_uint8_t buffer[6];
+    rt_err_t res;
 
-    mpu6xxx_read_regs(dev, MPU6XXX_RA_ACCEL_XOUT_H, 6, buffer);
+    res = mpu6xxx_read_regs(dev, MPU6XXX_RA_ACCEL_XOUT_H, 6, buffer);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
 
     accel->x = ((rt_uint16_t)buffer[0] << 8) + buffer[1];
     accel->y = ((rt_uint16_t)buffer[2] << 8) + buffer[3];
@@ -248,8 +278,13 @@ static rt_err_t mpu6xxx_get_accel_raw(struct mpu6xxx_device *dev, struct mpu6xxx
 static rt_err_t mpu6xxx_get_gyro_raw(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *gyro)
 {
     rt_uint8_t buffer[6];
+    rt_err_t res;
 
-    mpu6xxx_read_regs(dev, MPU6XXX_RA_GYRO_XOUT_H, 6, buffer);
+    res = mpu6xxx_read_regs(dev, MPU6XXX_RA_GYRO_XOUT_H, 6, buffer);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
 
     gyro->x = ((rt_uint16_t)buffer[0] << 8) + buffer[1];
     gyro->y = ((rt_uint16_t)buffer[2] << 8) + buffer[3];
@@ -269,8 +304,13 @@ static rt_err_t mpu6xxx_get_gyro_raw(struct mpu6xxx_device *dev, struct mpu6xxx_
 static rt_err_t mpu6xxx_get_temp_raw(struct mpu6xxx_device *dev, rt_int16_t *temp)
 {
     rt_uint8_t buffer[2];
+    rt_err_t res;
 
-    mpu6xxx_read_regs(dev, MPU6XXX_RA_TEMP_OUT_H, 2, buffer);
+    res = mpu6xxx_read_regs(dev, MPU6XXX_RA_TEMP_OUT_H, 2, buffer);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
 
     *temp = ((rt_uint16_t)buffer[0] << 8) + buffer[1];
 
@@ -289,45 +329,50 @@ static rt_err_t mpu6xxx_get_temp_raw(struct mpu6xxx_device *dev, rt_int16_t *tem
 static rt_err_t mpu6xxx_get_param(struct mpu6xxx_device *dev, enum mpu6xxx_cmd cmd, rt_uint16_t *param)
 {
     rt_uint8_t data = 0;
+    rt_err_t res = RT_EOK;
 
     RT_ASSERT(dev);
 
     switch (cmd)
     {
     case MPU6XXX_GYRO_RANGE:  /* Gyroscope full scale range */
-        mpu6xxx_read_bits(dev, MPU6XXX_RA_GYRO_CONFIG, MPU6XXX_GCONFIG_FS_SEL_BIT, MPU6XXX_GCONFIG_FS_SEL_LENGTH, &data);
+        res = mpu6xxx_read_bits(dev, MPU6XXX_RA_GYRO_CONFIG, MPU6XXX_GCONFIG_FS_SEL_BIT, MPU6XXX_GCONFIG_FS_SEL_LENGTH, &data);
         *param = data;
         break;
     case MPU6XXX_ACCEL_RANGE: /* Accelerometer full scale range */
-        mpu6xxx_read_bits(dev, MPU6XXX_RA_ACCEL_CONFIG, MPU6XXX_ACONFIG_AFS_SEL_BIT, MPU6XXX_ACONFIG_AFS_SEL_LENGTH, &data);
+        res = mpu6xxx_read_bits(dev, MPU6XXX_RA_ACCEL_CONFIG, MPU6XXX_ACONFIG_AFS_SEL_BIT, MPU6XXX_ACONFIG_AFS_SEL_LENGTH, &data);
         *param = data;
         break;
     case MPU6XXX_DLPF_CONFIG: /* Digital Low Pass Filter */
-        mpu6xxx_read_bits(dev, MPU6XXX_RA_CONFIG, MPU6XXX_CFG_DLPF_CFG_BIT, MPU6XXX_CFG_DLPF_CFG_LENGTH, &data);
+        res = mpu6xxx_read_bits(dev, MPU6XXX_RA_CONFIG, MPU6XXX_CFG_DLPF_CFG_BIT, MPU6XXX_CFG_DLPF_CFG_LENGTH, &data);
         *param = data;
         break;
     case MPU6XXX_SAMPLE_RATE: /* Sample Rate */
         /* Sample Rate = Gyroscope Output Rate / (1 + SMPLRT_DIV) */
-        mpu6xxx_read_bits(dev, MPU6XXX_RA_CONFIG, MPU6XXX_CFG_DLPF_CFG_BIT, MPU6XXX_CFG_DLPF_CFG_LENGTH, &data);
+        res = mpu6xxx_read_bits(dev, MPU6XXX_RA_CONFIG, MPU6XXX_CFG_DLPF_CFG_BIT, MPU6XXX_CFG_DLPF_CFG_LENGTH, &data);
+        if (res != RT_EOK)
+        {
+            break;
+        }
 
         if (data == 0 || data == 7) /* dlpf is disable */
         {
-            mpu6xxx_read_regs(dev, MPU6XXX_RA_SMPLRT_DIV, 1, &data);
+            res = mpu6xxx_read_regs(dev, MPU6XXX_RA_SMPLRT_DIV, 1, &data);
             *param = 8000 / (data + 1);
         }
         else /* dlpf is enable */
         {
-            mpu6xxx_read_regs(dev, MPU6XXX_RA_SMPLRT_DIV, 1, &data);
+            res = mpu6xxx_read_regs(dev, MPU6XXX_RA_SMPLRT_DIV, 1, &data);
             *param = 1000 / (data + 1);
         }
         break;
     case MPU6XXX_SLEEP: /* sleep mode */
-        mpu6xxx_read_bit(dev, MPU6XXX_RA_PWR_MGMT_1, MPU6XXX_PWR1_SLEEP_BIT, &data);
+        res = mpu6xxx_read_bit(dev, MPU6XXX_RA_PWR_MGMT_1, MPU6XXX_PWR1_SLEEP_BIT, &data);
         *param = data;
         break;
     }
 
-    return RT_EOK;
+    return res;
 }
 
 /**
@@ -342,28 +387,33 @@ static rt_err_t mpu6xxx_get_param(struct mpu6xxx_device *dev, enum mpu6xxx_cmd c
 rt_err_t mpu6xxx_set_param(struct mpu6xxx_device *dev, enum mpu6xxx_cmd cmd, rt_uint16_t param)
 {
     rt_uint8_t data = 0;
+    rt_err_t res = RT_EOK;
 
     RT_ASSERT(dev);
 
     switch (cmd)
     {
     case MPU6XXX_GYRO_RANGE:  /* Gyroscope full scale range */
-        mpu6xxx_write_bits(dev, MPU6XXX_RA_GYRO_CONFIG, MPU6XXX_GCONFIG_FS_SEL_BIT, MPU6XXX_GCONFIG_FS_SEL_LENGTH, param);
+        res = mpu6xxx_write_bits(dev, MPU6XXX_RA_GYRO_CONFIG, MPU6XXX_GCONFIG_FS_SEL_BIT, MPU6XXX_GCONFIG_FS_SEL_LENGTH, param);
         dev->config.gyro_range = param;
         break;
     case MPU6XXX_ACCEL_RANGE: /* Accelerometer full scale range */
-        mpu6xxx_write_bits(dev, MPU6XXX_RA_ACCEL_CONFIG, MPU6XXX_ACONFIG_AFS_SEL_BIT, MPU6XXX_ACONFIG_AFS_SEL_LENGTH, param);
+        res = mpu6xxx_write_bits(dev, MPU6XXX_RA_ACCEL_CONFIG, MPU6XXX_ACONFIG_AFS_SEL_BIT, MPU6XXX_ACONFIG_AFS_SEL_LENGTH, param);
         dev->config.accel_range = param;
         break;
     case MPU6XXX_DLPF_CONFIG: /* Digital Low Pass Filter */
-        mpu6xxx_write_bits(dev, MPU6XXX_RA_CONFIG, MPU6XXX_CFG_DLPF_CFG_BIT, MPU6XXX_CFG_DLPF_CFG_LENGTH, param);
+        res = mpu6xxx_write_bits(dev, MPU6XXX_RA_CONFIG, MPU6XXX_CFG_DLPF_CFG_BIT, MPU6XXX_CFG_DLPF_CFG_LENGTH, param);
         break;
     case MPU6XXX_SAMPLE_RATE: /* Sample Rate —— 16-bit unsigned value.
                                  Sample Rate = [1000 -  4]HZ when dlpf is enable
                                  Sample Rate = [8000 - 32]HZ when dlpf is disable */
 
         //Sample Rate = Gyroscope Output Rate / (1 + SMPLRT_DIV)
-        mpu6xxx_read_bits(dev, MPU6XXX_RA_CONFIG, MPU6XXX_CFG_DLPF_CFG_BIT, MPU6XXX_CFG_DLPF_CFG_LENGTH, &data);
+        res = mpu6xxx_read_bits(dev, MPU6XXX_RA_CONFIG, MPU6XXX_CFG_DLPF_CFG_BIT, MPU6XXX_CFG_DLPF_CFG_LENGTH, &data);
+        if (res != RT_EOK)
+        {
+            break;
+        }
 
         if (data == 0 || data == 7) /* dlpf is disable */
         {
@@ -383,14 +433,14 @@ rt_err_t mpu6xxx_set_param(struct mpu6xxx_device *dev, enum mpu6xxx_cmd cmd, rt_
             else
                 data = 1000 / param - 1;
         }
-        mpu6xxx_write_reg(dev, MPU6XXX_RA_SMPLRT_DIV, data);
+        res = mpu6xxx_write_reg(dev, MPU6XXX_RA_SMPLRT_DIV, data);
         break;
     case MPU6XXX_SLEEP: /* Configure sleep mode */
-        mpu6xxx_write_bit(dev, MPU6XXX_RA_PWR_MGMT_1, MPU6XXX_PWR1_SLEEP_BIT, param);
+        res = mpu6xxx_write_bit(dev, MPU6XXX_RA_PWR_MGMT_1, MPU6XXX_PWR1_SLEEP_BIT, param);
         break;
     }
 
-    return RT_EOK;
+    return res;
 }
 
 /**
@@ -405,8 +455,13 @@ rt_err_t mpu6xxx_get_accel(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *acc
 {
     struct mpu6xxx_3axes tmp;
     rt_uint16_t sen;
+    rt_err_t res;
 
-    mpu6xxx_get_accel_raw(dev, &tmp);
+    res = mpu6xxx_get_accel_raw(dev, &tmp);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
 
     sen = MPU6XXX_ACCEL_SEN >> dev->config.accel_range;
 
@@ -429,8 +484,13 @@ rt_err_t mpu6xxx_get_gyro(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *gyro
 {
     struct mpu6xxx_3axes tmp;
     rt_uint16_t sen;
+    rt_err_t res;
 
-    mpu6xxx_get_gyro_raw(dev, &tmp);
+    res = mpu6xxx_get_gyro_raw(dev, &tmp);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
 
     sen = MPU6XXX_GYRO_SEN >> dev->config.gyro_range;
 
@@ -452,8 +512,13 @@ rt_err_t mpu6xxx_get_gyro(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *gyro
 rt_err_t mpu6xxx_get_temp(struct mpu6xxx_device *dev, float *temp)
 {
     rt_int16_t tmp;
+    rt_err_t res;
 
-    mpu6xxx_get_temp_raw(dev, &tmp);
+    res = mpu6xxx_get_temp_raw(dev, &tmp);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
 
     if (dev->id == MPU6050_WHO_AM_I)
     {
@@ -480,7 +545,7 @@ rt_err_t mpu6xxx_get_temp(struct mpu6xxx_device *dev, float *temp)
 struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
 {
     struct mpu6xxx_device *dev = RT_NULL;
-    rt_uint8_t reg = 0xFF;
+    rt_uint8_t reg = 0xFF, res = RT_EOK;
 
     RT_ASSERT(dev_name);
 
@@ -518,7 +583,7 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
                     goto __exit;
                 }
             }
-            LOG_I("Device i2c address is:'0x%x'!", dev->i2c_addr);
+            LOG_D("Device i2c address is:'0x%x'!", dev->i2c_addr);
         }
     }
     else if (dev->bus->type == RT_Device_Class_SPIDevice)
@@ -558,7 +623,8 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
     case MPU9250_WHO_AM_I:
         LOG_I("Find device: mpu9250!");
         break;
-    case ICM20608_WHO_AM_I:
+    case ICM20608G_WHO_AM_I:
+    case ICM20608D_WHO_AM_I:
         LOG_I("Find device: icm20608!");
         break;
     case 0xFF:
@@ -568,16 +634,22 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
         LOG_W("Unknown device id: 0x%x!", reg);
     }
 
-    mpu6xxx_get_param(dev, MPU6XXX_ACCEL_RANGE, &dev->config.accel_range);
-    mpu6xxx_get_param(dev, MPU6XXX_GYRO_RANGE, &dev->config.gyro_range);
+    res += mpu6xxx_get_param(dev, MPU6XXX_ACCEL_RANGE, &dev->config.accel_range);
+    res += mpu6xxx_get_param(dev, MPU6XXX_GYRO_RANGE, &dev->config.gyro_range);
 
-    mpu6xxx_write_bits(dev, MPU6XXX_RA_PWR_MGMT_1, MPU6XXX_PWR1_CLKSEL_BIT, MPU6XXX_PWR1_CLKSEL_LENGTH, MPU6XXX_CLOCK_PLL_XGYRO);
-    mpu6xxx_set_param(dev, MPU6XXX_GYRO_RANGE, MPU6XXX_GYRO_RANGE_250DPS);
-    mpu6xxx_set_param(dev, MPU6XXX_ACCEL_RANGE, MPU6XXX_ACCEL_RANGE_2G);
-    mpu6xxx_set_param(dev, MPU6XXX_SLEEP, MPU6XXX_SLEEP_DISABLE);
+    res += mpu6xxx_write_bits(dev, MPU6XXX_RA_PWR_MGMT_1, MPU6XXX_PWR1_CLKSEL_BIT, MPU6XXX_PWR1_CLKSEL_LENGTH, MPU6XXX_CLOCK_PLL_XGYRO);
+    res += mpu6xxx_set_param(dev, MPU6XXX_GYRO_RANGE, MPU6XXX_GYRO_RANGE_250DPS);
+    res += mpu6xxx_set_param(dev, MPU6XXX_ACCEL_RANGE, MPU6XXX_ACCEL_RANGE_2G);
+    res += mpu6xxx_set_param(dev, MPU6XXX_SLEEP, MPU6XXX_SLEEP_DISABLE);
 
-    LOG_I("mpu6xxx init succeed!");
-
+    if (res == RT_EOK)
+    {
+        LOG_I("Device init succeed!");
+    }
+    else
+    {
+        LOG_W("Error in device initialization!");
+    }
     return dev;
 
 __exit:
@@ -645,8 +717,8 @@ static void mpu6xxx(int argc, char **argv)
             mpu6xxx_get_gyro(dev, &gyro);
             mpu6xxx_get_temp(dev, &temp);
 
-            rt_kprintf("accel.x = %3d, accel.y = %3d, accel.z = %3d ", accel.x, accel.y, accel.z);
-            rt_kprintf("gyro.x = %3d gyro.y = %3d, gyro.z = %3d, ", gyro.x, gyro.y, gyro.z);
+            rt_kprintf("accel.x = %4d, accel.y = %4d, accel.z = %4d ", accel.x, accel.y, accel.z);
+            rt_kprintf("gyro.x = %4d gyro.y = %4d, gyro.z = %4d, ", gyro.x, gyro.y, gyro.z);
             rt_kprintf("temp = %d.%d\n", (int)(temp * 100) / 100, (int)(temp * 100) % 100);
 
             rt_thread_mdelay(100);
