@@ -143,6 +143,20 @@ static rt_size_t _mpu6xxx_polling_get_data(rt_sensor_t sensor, struct rt_sensor_
         data->data.gyro.z = gyro.z * 100;
         data->timestamp = rt_sensor_get_ts();
     }
+    else if (sensor->info.type == RT_SENSOR_CLASS_MAG)
+    {
+        struct mpu6xxx_3axes mag;
+        if (mpu6xxx_get_mag(mpu_dev, &mag) != RT_EOK)
+        {
+            return 0;
+        }
+
+        data->type = RT_SENSOR_CLASS_MAG;
+        data->data.mag.x = mag.x * 10;
+        data->data.mag.y = mag.y * 10;
+        data->data.mag.z = mag.z * 10;
+        data->timestamp = rt_sensor_get_ts();
+    }
     return 1;
 }
 
@@ -196,7 +210,7 @@ static struct rt_sensor_ops sensor_ops =
 int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
 {
     rt_int8_t result;
-    rt_sensor_t sensor_acce = RT_NULL, sensor_gyro = RT_NULL;
+    rt_sensor_t sensor_acce = RT_NULL, sensor_gyro = RT_NULL, sensor_mag = RT_NULL;
 
 #ifdef PKG_USING_MPU6XXX_ACCE
     /* accelerometer sensor register */
@@ -245,6 +259,34 @@ int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
         sensor_gyro->ops = &sensor_ops;
 
         result = rt_hw_sensor_register(sensor_gyro, name, RT_DEVICE_FLAG_RDWR, RT_NULL);
+        if (result != RT_EOK)
+        {
+            LOG_E("device register err code: %d", result);
+            goto __exit;
+        }
+    }
+#endif
+
+#ifdef PKG_USING_MPU6XXX_MAG
+    /* magnetometer sensor register */
+    {
+        sensor_mag = rt_calloc(1, sizeof(struct rt_sensor_device));
+        if (sensor_mag == RT_NULL)
+            goto __exit;
+
+        sensor_mag->info.type       = RT_SENSOR_CLASS_MAG;
+        sensor_mag->info.vendor     = RT_SENSOR_VENDOR_INVENSENSE;
+        sensor_mag->info.model      = "mpu6xxx_mag";
+        sensor_mag->info.unit       = RT_SENSOR_UNIT_MGAUSS;
+        sensor_mag->info.intf_type  = RT_SENSOR_INTF_I2C | RT_SENSOR_INTF_SPI;
+        sensor_mag->info.range_max  = 49120;
+        sensor_mag->info.range_min  = -49120;
+        sensor_mag->info.period_min = 100;
+
+        rt_memcpy(&sensor_mag->config, cfg, sizeof(struct rt_sensor_config));
+        sensor_mag->ops = &sensor_ops;
+
+        result = rt_hw_sensor_register(sensor_mag, name, RT_DEVICE_FLAG_RDWR, RT_NULL);
         if (result != RT_EOK)
         {
             LOG_E("device register err code: %d", result);
