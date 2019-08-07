@@ -210,7 +210,11 @@ static struct rt_sensor_ops sensor_ops =
 int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
 {
     rt_int8_t result;
-    rt_sensor_t sensor_acce = RT_NULL, sensor_gyro = RT_NULL, sensor_mag = RT_NULL;
+    rt_sensor_t sensor_acce = RT_NULL, sensor_gyro = RT_NULL;
+    
+#ifdef PKG_USING_MPU6XXX_MAG
+    rt_sensor_t sensor_mag = RT_NULL;
+#endif
 
 #ifdef PKG_USING_MPU6XXX_ACCE
     /* accelerometer sensor register */

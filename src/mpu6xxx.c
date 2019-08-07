@@ -20,7 +20,10 @@
 
 #include "mpu6xxx.h"
 #include "mpu6xxx_reg.h"
+
+#ifdef PKG_USING_MPU6XXX_MAG
 #include "ak8963_reg.h"
+#endif 
 
 #define MPU6XXX_ACCEL_SEN     (16384)
 #define MPU6XXX_GYRO_SEN      (1310)
@@ -323,6 +326,7 @@ static rt_err_t mpu6xxx_get_gyro_raw(struct mpu6xxx_device *dev, struct mpu6xxx_
     return RT_EOK;
 }
 
+#ifdef PKG_USING_MPU6XXX_MAG
 /**
  * This function gets the raw data of the magnetometer
  *
@@ -348,6 +352,7 @@ static rt_err_t mpu6xxx_get_mag_raw(struct mpu6xxx_device *dev, struct mpu6xxx_3
 
     return RT_EOK;
 }
+#endif
 
 /**
  * This function gets the raw data of the temperature
@@ -557,6 +562,8 @@ rt_err_t mpu6xxx_get_gyro(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *gyro
     return RT_EOK;
 }
 
+#ifdef PKG_USING_MPU6XXX_MAG
+
 /**
  * This function gets the data of the magnetometer, unit: uT
  *
@@ -582,6 +589,8 @@ rt_err_t mpu6xxx_get_mag(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *mag)
 
     return RT_EOK;
 }
+
+#endif
 
 /**
  * This function gets the data of the temperature, unit: Centigrade

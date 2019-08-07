@@ -134,6 +134,8 @@ rt_err_t mpu6xxx_get_accel(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *acc
  */
 rt_err_t mpu6xxx_get_gyro(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *gyro);
 
+#ifdef PKG_USING_MPU6XXX_MAG
+
 /**
  * This function gets the data of the magnetometer, unit: uT
  *
@@ -143,6 +145,8 @@ rt_err_t mpu6xxx_get_gyro(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *gyro
  * @return the reading status, RT_EOK reprensents  reading the data successfully.
  */
 rt_err_t mpu6xxx_get_mag(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *mag);
+
+#endif
 
 /**
  * This function gets the data of the temperature, unit: Centigrade
