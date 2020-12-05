@@ -150,6 +150,7 @@ static rt_size_t mpu6xxx_fetch_data(struct rt_sensor_device *sensor, void *buf, 
 {
     RT_ASSERT(buf);
 
+    mpu_dev->i2c_addr = (rt_uint32_t)(sensor->config.intf.user_data) & 0xff;
     if (sensor->config.mode == RT_SENSOR_MODE_POLLING)
     {
         return _mpu6xxx_polling_get_data(sensor, buf);
@@ -162,6 +163,7 @@ static rt_err_t mpu6xxx_control(struct rt_sensor_device *sensor, int cmd, void *
 {
     rt_err_t result = RT_EOK;
 
+    mpu_dev->i2c_addr = (rt_uint32_t)(sensor->config.intf.user_data) & 0xff;
     switch (cmd)
     {
     case RT_SENSOR_CTRL_GET_ID:
