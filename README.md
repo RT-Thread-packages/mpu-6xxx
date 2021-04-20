@@ -8,24 +8,24 @@ This software package is a universal sensor driver package for InvenSense's six-
 
 ## Support
 
-| Contains equipment | Accelerometer | Gyroscope |
-| ---------------- | -------- | ------ |
-| **Communication Interface** | | |
-| IIC | √ | √ |
-| SPI | √ | √ |
-| **Work Mode** | | |
-| Polling | √ | √ |
-| Interruption | | |
-| FIFO | | |
-| **Power Mode** | | |
-| Power down | √ | √ |
-| Low power consumption | | |
-| Normal | √ | √ |
-| High power consumption | | |
-| **Data output rate** | | |
-| **Measuring Range** | √ | √ |
-| **Self-check** | | |
-| **Multi-instance** | | |
+| Contains equipment          | Accelerometer | Gyroscope | Magnetometer |
+| --------------------------- | ------------- | --------- | ------------ |
+| **Communication Interface** |               |           |              |
+| IIC                         | √             | √         | √            |
+| SPI                         | √             | √         | √            |
+| **Work Mode**               |               |           |              |
+| Polling                     | √             | √         | √            |
+| Interruption                |               |           |              |
+| FIFO                        |               |           |              |
+| **Power Mode**              |               |           |              |
+| Power down                  | √             | √         | √            |
+| Low power consumption       |               |           |              |
+| Normal                      | √             | √         | √            |
+| High power consumption      |               |           |              |
+| **Data output rate**        |               |           |              |
+| **Measuring Range**         | √             | √         | √            |
+| **Self-check**              |               |           |              |
+| **Multi-instance**          |               |           |              |
 
 ## Instructions for use
 
@@ -40,18 +40,21 @@ This software package is a universal sensor driver package for InvenSense's six-
 To use the MPU6xxx software package, you need to select it in the RT-Thread package management. The specific path is as follows:
 
 ```
-RT-Thread online packages --->
-  peripheral libraries and drivers --->
-    sensors drivers --->
-      mpu6xxx: Universal 6-axis sensor driver package, support: accelerometer, gyroscope.
-              Version (latest) --->
-        [*] Enable mpu6xxx acce
-        [*] Enable mpu6xxx gyro
+RT-Thread online packages  --->
+  peripheral libraries and drivers  --->
+    sensors drivers  --->
+      mpu6xxx: Universal 6-axis sensor driver package,support: accelerometer, gyroscope.
+              Version (latest)  --->
+        [*]   Enable mpu6xxx acce
+        [*]   Enable mpu6xxx gyro
+        [*]   Enable mpu6xxx mag
 ```
 
 **Enable MPU6xxx acce**: Configure to enable the accelerometer function
 
 **Enable MPU6xxx gyro**: Configure to turn on the gyroscope function
+
+**Enable MPU6xxx mag**: Configure to turn on the Magnetometer function
 
 **Version**: software package version selection
 
