@@ -136,6 +136,7 @@ static rt_size_t _mpu6xxx_polling_get_data(rt_sensor_t sensor, struct rt_sensor_
         data->data.gyro.z = gyro.z * 100;
         data->timestamp = rt_sensor_get_ts();
     }
+#ifdef PKG_USING_MPU6XXX_MAG
     else if (sensor->info.type == RT_SENSOR_CLASS_MAG)
     {
         struct mpu6xxx_3axes mag;
@@ -150,6 +151,7 @@ static rt_size_t _mpu6xxx_polling_get_data(rt_sensor_t sensor, struct rt_sensor_
         data->data.mag.z = mag.z * 10;
         data->timestamp = rt_sensor_get_ts();
     }
+#endif
     return 1;
 }
 
@@ -204,18 +206,21 @@ int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
 {
     rt_int8_t result;
     struct mpu6xxx_device *mpu_dev_temp;
-    rt_sensor_t sensor_acce = RT_NULL, sensor_gyro = RT_NULL;
-    
-#ifdef PKG_USING_MPU6XXX_MAG
-    rt_sensor_t sensor_mag = RT_NULL;
-#endif
+    rt_sensor_t sensor_acce = RT_NULL, sensor_gyro = RT_NULL, sensor_mag = RT_NULL;
+
+    mpu_dev_temp = _mpu6xxx_init(&cfg->intf);
+    if (mpu_dev_temp == RT_NULL)
+    {
+        LOG_E("_mpu6xxx init err!");
+        goto __exit;
+    }
 
 #ifdef PKG_USING_MPU6XXX_ACCE
     /* accelerometer sensor register */
     {
         sensor_acce = rt_calloc(1, sizeof(struct rt_sensor_device));
         if (sensor_acce == RT_NULL)
-            return -1;
+            goto __exit;
 
         sensor_acce->info.type       = RT_SENSOR_CLASS_ACCE;
         sensor_acce->info.vendor     = RT_SENSOR_VENDOR_INVENSENSE;
@@ -233,7 +238,7 @@ int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
         if (result != RT_EOK)
         {
             LOG_E("device register err code: %d", result);
-            goto __exit;
+            goto acce__exit;
         }
     }
 #endif
@@ -242,7 +247,7 @@ int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
     {
         sensor_gyro = rt_calloc(1, sizeof(struct rt_sensor_device));
         if (sensor_gyro == RT_NULL)
-            goto __exit;
+            goto gyro__exit;
 
         sensor_gyro->info.type       = RT_SENSOR_CLASS_GYRO;
         sensor_gyro->info.vendor     = RT_SENSOR_VENDOR_INVENSENSE;
@@ -260,7 +265,7 @@ int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
         if (result != RT_EOK)
         {
             LOG_E("device register err code: %d", result);
-            goto __exit;
+            goto gyro__exit;
         }
     }
 #endif
@@ -270,7 +275,7 @@ int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
     {
         sensor_mag = rt_calloc(1, sizeof(struct rt_sensor_device));
         if (sensor_mag == RT_NULL)
-            goto __exit;
+            goto mag__exit;
 
         sensor_mag->info.type       = RT_SENSOR_CLASS_MAG;
         sensor_mag->info.vendor     = RT_SENSOR_VENDOR_INVENSENSE;
@@ -288,17 +293,11 @@ int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
         if (result != RT_EOK)
         {
             LOG_E("device register err code: %d", result);
-            goto __exit;
+            goto mag__exit;
         }
     }
 #endif
 
-    mpu_dev_temp = _mpu6xxx_init(&cfg->intf);
-    if (mpu_dev_temp == RT_NULL)
-    {
-        LOG_E("_mpu6xxx init err code: %d", result);
-        goto __exit;
-    }
     sensor_acce->parent.user_data = mpu_dev_temp;
     sensor_gyro->parent.user_data = mpu_dev_temp;
     sensor_mag->parent.user_data  = mpu_dev_temp;
@@ -306,12 +305,29 @@ int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
     LOG_I("sensor init success");
     return RT_EOK;
 
-__exit:
-    if (sensor_acce)
-        rt_free(sensor_acce);
+#ifdef PKG_USING_MPU6XXX_MAG
+mag__exit:
+    if (sensor_mag)
+        rt_free(sensor_mag);
+#endif
+
+#ifdef PKG_USING_MPU6XXX_GYRO
+    rt_device_unregister((rt_device_t)sensor_gyro);
+gyro__exit:
     if (sensor_gyro)
         rt_free(sensor_gyro);
+#endif
+
+#ifdef PKG_USING_MPU6XXX_ACCE
+    rt_device_unregister((rt_device_t)sensor_acce);
+acce__exit:
+    if (sensor_acce)
+        rt_free(sensor_acce);
+#endif
+
+__exit:
     if (mpu_dev_temp)
         mpu6xxx_deinit(mpu_dev_temp);
+
     return -RT_ERROR;
 }
