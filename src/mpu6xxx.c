@@ -21,6 +21,10 @@
 #include "mpu6xxx.h"
 #include "mpu6xxx_reg.h"
 
+#ifdef PKG_USING_MPU6XXX_MAG
+#include "ak8963_reg.h"
+#endif 
+
 #define MPU6XXX_ACCEL_SEN     (16384)
 #define MPU6XXX_GYRO_SEN      (1310)
 
@@ -30,6 +34,10 @@
 
 #define MPU6500_TEMP_SEN      (333.87)
 #define MPU6500_TEMP_OFFSET   (21)
+
+// MAG
+#define AK8963_RANGE          (4912)
+#define AK8963_FULLSCALE      (32760)
 
 /**
  * This function writes the value of the register for mpu6xxx
@@ -241,6 +249,31 @@ static rt_err_t mpu6xxx_read_bits(struct mpu6xxx_device *dev, rt_uint8_t reg, rt
     return RT_EOK;
 }
 
+// MAG
+#ifdef PKG_USING_MPU6XXX_MAG
+
+#define MAG_READ_DELAY_TIME         50
+
+static void mpu92_mag_write_reg(struct mpu6xxx_device *dev, rt_uint8_t addr, rt_uint8_t data)
+{
+    rt_uint8_t  status = 0;
+    rt_uint32_t timeout = MAG_READ_DELAY_TIME;
+
+    mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV4_ADDR, AK8963_I2C_ADDR);
+    mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV4_REG, addr);
+    mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV4_DO, data);
+    mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV4_CTRL, MPU6500_I2C_SLVx_EN);
+
+    do 
+    {
+        mpu6xxx_read_regs(dev, MPU6XXX_RA_I2C_MST_STATUS, 1, &status);
+        rt_thread_mdelay(1);
+    } while (((status & MPU6500_I2C_SLV4_DONE) == 0) && (timeout--));
+
+}
+
+#endif // PKG_USING_MPU6XXX_MAG
+
 /**
  * This function gets the raw data of the accelerometer
  *
@@ -292,6 +325,34 @@ static rt_err_t mpu6xxx_get_gyro_raw(struct mpu6xxx_device *dev, struct mpu6xxx_
 
     return RT_EOK;
 }
+
+#ifdef PKG_USING_MPU6XXX_MAG
+/**
+ * This function gets the raw data of the magnetometer
+ *
+ * @param dev the pointer of device driver structure
+ * @param mag the pointer of 3axes structure for receive data
+ *
+ * @return the reading status, RT_EOK reprensents  reading the data successfully.
+ */
+static rt_err_t mpu6xxx_get_mag_raw(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *mag)
+{
+    rt_uint8_t buffer[8];
+    rt_err_t res;
+
+    res = mpu6xxx_read_regs(dev, MPU6XXX_RA_EXT_SENS_DATA_00, 8, buffer);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
+
+    mag->x = ((rt_uint16_t)buffer[2] << 8) + buffer[1];
+    mag->y = ((rt_uint16_t)buffer[4] << 8) + buffer[3];
+    mag->z = ((rt_uint16_t)buffer[6] << 8) + buffer[5];
+
+    return RT_EOK;
+}
+#endif
 
 /**
  * This function gets the raw data of the temperature
@@ -501,6 +562,36 @@ rt_err_t mpu6xxx_get_gyro(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *gyro
     return RT_EOK;
 }
 
+#ifdef PKG_USING_MPU6XXX_MAG
+
+/**
+ * This function gets the data of the magnetometer, unit: uT
+ *
+ * @param dev the pointer of device driver structure
+ * @param gyro the pointer of 3axes structure for receive data
+ *
+ * @return the reading status, RT_EOK reprensents  reading the data successfully.
+ */
+rt_err_t mpu6xxx_get_mag(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *mag)
+{
+    struct mpu6xxx_3axes tmp;
+    rt_err_t res;
+
+    res = mpu6xxx_get_mag_raw(dev, &tmp);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
+
+    mag->x = ((rt_int32_t)tmp.x * AK8963_RANGE) / AK8963_FULLSCALE;
+    mag->y = ((rt_int32_t)tmp.y * AK8963_RANGE) / AK8963_FULLSCALE;
+    mag->z = ((rt_int32_t)tmp.z * AK8963_RANGE) / AK8963_FULLSCALE;
+
+    return RT_EOK;
+}
+
+#endif
+
 /**
  * This function gets the data of the temperature, unit: Centigrade
  *
@@ -641,6 +732,31 @@ struct mpu6xxx_device *mpu6xxx_init(const char *dev_name, rt_uint8_t param)
     res += mpu6xxx_set_param(dev, MPU6XXX_GYRO_RANGE, MPU6XXX_GYRO_RANGE_250DPS);
     res += mpu6xxx_set_param(dev, MPU6XXX_ACCEL_RANGE, MPU6XXX_ACCEL_RANGE_2G);
     res += mpu6xxx_set_param(dev, MPU6XXX_SLEEP, MPU6XXX_SLEEP_DISABLE);
+
+#ifdef PKG_USING_MPU6XXX_MAG
+    mpu6xxx_write_reg(dev, MPU6XXX_RA_USER_CTRL, 0x20);
+    mpu92_mag_write_reg(dev, AK8963_REG_CNTL2, 0x01);      /* [0]  Reset Device                  */
+    rt_thread_mdelay(1);
+    mpu92_mag_write_reg(dev, AK8963_REG_CNTL1, 0x00);      /* [1]  Power-down mode               */
+    mpu92_mag_write_reg(dev, AK8963_REG_CNTL1, 0x0F);      /* [2]  Fuse ROM access mode          */
+    mpu92_mag_write_reg(dev, AK8963_REG_CNTL1, 0x00);      /* [3]  Power-down mode               */
+    rt_thread_mdelay(1);    // 100us
+    mpu92_mag_write_reg(dev, AK8963_REG_CNTL1, 0x16);      /* [4]  16bits and Continuous measurement mode 2 */
+
+    /* config mpu9250 i2c */
+    rt_thread_mdelay(2);
+    mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_MST_CTRL, 0x5D);
+    rt_thread_mdelay(2);
+    mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV0_ADDR, AK8963_I2C_ADDR | 0x80);
+    rt_thread_mdelay(2);
+    mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV0_REG, AK8963_REG_ST1);
+    rt_thread_mdelay(2);
+    mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV0_CTRL, MPU6500_I2C_SLVx_EN | 8);
+    rt_thread_mdelay(2);
+    mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV4_CTRL, 0x09);
+    rt_thread_mdelay(2);
+    mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_MST_DELAY_CTRL, 0x81);
+#endif
 
     if (res == RT_EOK)
     {
