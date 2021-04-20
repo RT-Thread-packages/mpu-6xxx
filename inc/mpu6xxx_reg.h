@@ -130,7 +130,11 @@
 #define MPU6XXX_RA_FIFO_COUNTL                  0x73
 #define MPU6XXX_RA_FIFO_R_W                     0x74
 #define MPU6XXX_RA_WHO_AM_I                     0x75
-            
+
+#define MPU6500_I2C_SLVx_EN                     ((uint8_t)0x80)
+#define MPU6500_I2C_SLV4_DONE                   ((uint8_t)0x40)
+#define MPU6500_I2C_SLV4_NACK                   ((uint8_t)0x10)
+
 #define MPU6XXX_TC_PWR_MODE_BIT                 7
 #define MPU6XXX_TC_OFFSET_BIT                   6
 #define MPU6XXX_TC_OFFSET_LENGTH                6
