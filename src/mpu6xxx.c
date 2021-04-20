@@ -505,7 +505,7 @@ rt_err_t mpu6xxx_set_param(struct mpu6xxx_device *dev, enum mpu6xxx_cmd cmd, rt_
 }
 
 /**
-* This function gets the data of the accelerometer, unit: mg
+ * This function gets the data of the accelerometer, unit: mg
  *
  * @param dev the pointer of device driver structure
  * @param accel the pointer of 3axes structure for receive data
@@ -534,7 +534,8 @@ rt_err_t mpu6xxx_get_accel(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *acc
 }
 
 /**
-* This function gets the data of the gyroscope, unit: deg/10s
+ * This function gets the data of the gyroscope, unit: deg/10s
+ * Here deg/10s means 10 times higher precision than deg/s. 
  *
  * @param dev the pointer of device driver structure
  * @param gyro the pointer of 3axes structure for receive data
