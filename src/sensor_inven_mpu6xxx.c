@@ -14,20 +14,13 @@
 #define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
-static struct mpu6xxx_device *mpu_dev;
+#define mpu_dev ((struct mpu6xxx_device *)sensor->parent.user_data)
 
-static rt_err_t _mpu6xxx_init(struct rt_sensor_intf *intf)
+static struct mpu6xxx_device *_mpu6xxx_init(struct rt_sensor_intf *intf)
 {
     rt_uint8_t  i2c_addr = (rt_uint32_t)(intf->user_data) & 0xff;
 
-    mpu_dev = mpu6xxx_init(intf->dev_name, i2c_addr);
-
-    if (mpu_dev == RT_NULL)
-    {
-        return -RT_ERROR;
-    }
-
-    return RT_EOK;
+    return mpu6xxx_init(intf->dev_name, i2c_addr);
 }
 
 static rt_err_t _mpu6xxx_set_range(rt_sensor_t sensor, rt_int32_t range)
@@ -210,6 +203,7 @@ static struct rt_sensor_ops sensor_ops =
 int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
 {
     rt_int8_t result;
+    struct mpu6xxx_device *mpu_dev_temp;
     rt_sensor_t sensor_acce = RT_NULL, sensor_gyro = RT_NULL;
     
 #ifdef PKG_USING_MPU6XXX_MAG
@@ -299,12 +293,15 @@ int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
     }
 #endif
 
-    result = _mpu6xxx_init(&cfg->intf);
-    if (result != RT_EOK)
+    mpu_dev_temp = _mpu6xxx_init(&cfg->intf);
+    if (mpu_dev_temp == RT_NULL)
     {
         LOG_E("_mpu6xxx init err code: %d", result);
         goto __exit;
     }
+    sensor_acce->parent.user_data = mpu_dev_temp;
+    sensor_gyro->parent.user_data = mpu_dev_temp;
+    sensor_mag->parent.user_data  = mpu_dev_temp;
 
     LOG_I("sensor init success");
     return RT_EOK;
@@ -314,7 +311,7 @@ __exit:
         rt_free(sensor_acce);
     if (sensor_gyro)
         rt_free(sensor_gyro);
-    if (mpu_dev)
-        mpu6xxx_deinit(mpu_dev);
+    if (mpu_dev_temp)
+        mpu6xxx_deinit(mpu_dev_temp);
     return -RT_ERROR;
 }
