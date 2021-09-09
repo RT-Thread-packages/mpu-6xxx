@@ -627,6 +627,98 @@ rt_err_t mpu6xxx_get_temp(struct mpu6xxx_device *dev, float *temp)
 }
 
 /**
+* This function sets the offset of the accelerometer
+ *
+ * @param dev the pointer of device driver structure
+ * @param offset the pointer of 3axes structure of offsets
+ *
+ * @return the setting status, RT_EOK reprensents  setting the offsets successfully.
+ */
+rt_err_t mpu6xxx_set_accel_offset(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *offset)
+{
+    rt_err_t res=0;
+    res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_XA_OFFS_H, (offset->x)>>8);
+    res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_XA_OFFS_L_TC, (offset->x)&0x00ff);
+    res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_YA_OFFS_H, (offset->y)>>8);
+    res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_YA_OFFS_L_TC, (offset->y)&0x00ff);
+    res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_ZA_OFFS_H, (offset->z)>>8);
+    res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_ZA_OFFS_L_TC, (offset->z)&0x00ff);
+    return res;
+}
+
+/**
+* This function gets the offset of the accelerometer
+ *
+ * @param dev the pointer of device driver structure
+ * @param offset the pointer of 3axes structure of offsets
+ *
+ * @return the setting status, RT_EOK reprensents  reading the offsets successfully.
+ */
+rt_err_t mpu6xxx_get_accel_offset(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *offset)
+{
+    rt_uint8_t buffer[6];
+    rt_err_t res;
+
+    res = mpu6xxx_read_regs(dev, MPU6XXX_RA_XA_OFFS_H, 6, buffer);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
+
+    offset->x = ((rt_uint16_t)buffer[0] << 8) + buffer[1];
+    offset->y = ((rt_uint16_t)buffer[2] << 8) + buffer[3];
+    offset->z = ((rt_uint16_t)buffer[4] << 8) + buffer[5];
+
+return RT_EOK;
+}
+
+/**
+* This function sets the offset of the gyroscope
+ *
+ * @param dev the pointer of device driver structure
+ * @param offset the pointer of 3axes structure of offsets
+ *
+ * @return the setting status, RT_EOK reprensents  setting the offsets successfully.
+ */
+rt_err_t mpu6xxx_set_gyro_offset(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *offset)
+{
+    rt_err_t res=0;
+    res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_XG_OFFS_USRH, (offset->x)>>8);
+    res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_XG_OFFS_USRL, (offset->x)&0x00ff);
+    res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_YG_OFFS_USRH, (offset->y)>>8);
+    res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_YG_OFFS_USRL, (offset->y)&0x00ff);
+    res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_ZG_OFFS_USRH, (offset->z)>>8);
+    res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_ZG_OFFS_USRL, (offset->z)&0x00ff);
+    return res;
+}
+
+/**
+* This function gets the offset of the gyroscope
+ *
+ * @param dev the pointer of device driver structure
+ * @param offset the pointer of 3axes structure of offsets
+ *
+ * @return the setting status, RT_EOK reprensents  reading the offsets successfully.
+ */
+rt_err_t mpu6xxx_get_gyro_offset(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *offset)
+{
+    rt_uint8_t buffer[6];
+    rt_err_t res;
+
+    res = mpu6xxx_read_regs(dev, MPU6XXX_RA_XG_OFFS_USRH, 6, buffer);
+    if (res != RT_EOK)
+    {
+        return res;
+    }
+
+    offset->x = ((rt_uint16_t)buffer[0] << 8) + buffer[1];
+    offset->y = ((rt_uint16_t)buffer[2] << 8) + buffer[3];
+    offset->z = ((rt_uint16_t)buffer[4] << 8) + buffer[5];
+
+return RT_EOK;
+}
+
+/**
  * This function initialize the mpu6xxx device.
  *
  * @param dev_name the name of transfer device

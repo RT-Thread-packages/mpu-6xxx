@@ -158,4 +158,44 @@ rt_err_t mpu6xxx_get_mag(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *mag);
  */
 rt_err_t mpu6xxx_get_temp(struct mpu6xxx_device *dev, float *temp);
 
+/**
+* This function sets the offset of the accelerometer
+ *
+ * @param dev the pointer of device driver structure
+ * @param offset the pointer of 3axes structure of offsets
+ *
+ * @return the setting status, RT_EOK reprensents setting the offsets successfully.
+ */
+rt_err_t mpu6xxx_set_accel_offset(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *offset);
+
+/**
+* This function gets the offset of the accelerometer
+ *
+ * @param dev the pointer of device driver structure
+ * @param offset the pointer of 3axes structure of offsets
+ *
+ * @return the setting status, RT_EOK reprensents reading the offsets successfully.
+ */
+rt_err_t mpu6xxx_get_accel_offset(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *offset);
+
+/**
+* This function sets the offset of the gyroscope
+ *
+ * @param dev the pointer of device driver structure
+ * @param offset the pointer of 3axes structure of offsets
+ *
+ * @return the setting status, RT_EOK reprensents setting the offsets successfully.
+ */
+rt_err_t mpu6xxx_set_gyro_offset(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *offset);
+
+/**
+* This function gets the offset of the gyroscope
+ *
+ * @param dev the pointer of device driver structure
+ * @param offset the pointer of 3axes structure of offsets
+ *
+ * @return the setting status, RT_EOK reprensents reading the offsets successfully.
+ */
+rt_err_t mpu6xxx_get_gyro_offset(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *offset);
+
 #endif
