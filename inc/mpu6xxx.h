@@ -6,6 +6,7 @@
  * Change Logs:
  * Date           Author       Notes
  * 2018-10-23     flybreak     the first version
+ * 2021-09-09     scratch-er   added setting and getting sensor offsets
  */
 
 #ifndef MPU6XXX_H_
