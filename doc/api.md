@@ -149,6 +149,40 @@ rt_err_t mpu6xxx_get_accel(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *acc
 | RT_EOK   | 成功                                    |
 | < 0      | 失败                                    |
 
+## 校准传感器
+
+### 校准陀螺仪
+
+```c
+rt_err_t mpu6xxx_set_gyro_offset(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *offset);
+```
+
+ 校准陀螺仪。注意offset的单位和读取数据的单位不同。
+
+| 参数     | 描述                        |
+| :------- | :-------------------------- |
+| dev      | mpu6xxx_device 结构体的指针 |
+| offset   | 存储 校准量 结构体的指针    |
+| **返回** | **描述**                    |
+| RT_EOK   | 成功                        |
+| 其他     | 失败                        |
+
+### 校准加速度传感器
+
+```c
+rt_err_t mpu6xxx_set_gyro_offset(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *offset);
+```
+
+校准加速度传感器。注意offset的单位和读取数据的单位不同。
+
+| 参数     | 描述                        |
+| :------- | :-------------------------- |
+| dev      | mpu6xxx_device 结构体的指针 |
+| offset   | 存储 校准量 结构体的指针    |
+| **返回** | **描述**                    |
+| RT_EOK   | 成功                        |
+| 其他     | 失败                        |
+
 ### 读取温度计数据
 
 ```{.c}
