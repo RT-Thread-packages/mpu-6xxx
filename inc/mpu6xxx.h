@@ -13,6 +13,7 @@
 #define MPU6XXX_H_
 
 #include <rtthread.h>
+#include <stdint.h>
 
 /* Accelerometer full scale range */
 enum mpu6xxx_accel_range
