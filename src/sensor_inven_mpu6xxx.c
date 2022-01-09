@@ -234,7 +234,7 @@ int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
         rt_memcpy(&sensor_acce->config, cfg, sizeof(struct rt_sensor_config));
         sensor_acce->ops = &sensor_ops;
 
-        result = rt_hw_sensor_register(sensor_acce, name, RT_DEVICE_FLAG_RDWR, RT_NULL);
+        result = rt_hw_sensor_register(sensor_acce, name, RT_DEVICE_FLAG_RDWR, mpu_dev_temp);
         if (result != RT_EOK)
         {
             LOG_E("device register err code: %d", result);
@@ -261,7 +261,7 @@ int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
         rt_memcpy(&sensor_gyro->config, cfg, sizeof(struct rt_sensor_config));
         sensor_gyro->ops = &sensor_ops;
 
-        result = rt_hw_sensor_register(sensor_gyro, name, RT_DEVICE_FLAG_RDWR, RT_NULL);
+        result = rt_hw_sensor_register(sensor_gyro, name, RT_DEVICE_FLAG_RDWR, mpu_dev_temp);
         if (result != RT_EOK)
         {
             LOG_E("device register err code: %d", result);
@@ -289,7 +289,7 @@ int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
         rt_memcpy(&sensor_mag->config, cfg, sizeof(struct rt_sensor_config));
         sensor_mag->ops = &sensor_ops;
 
-        result = rt_hw_sensor_register(sensor_mag, name, RT_DEVICE_FLAG_RDWR, RT_NULL);
+        result = rt_hw_sensor_register(sensor_mag, name, RT_DEVICE_FLAG_RDWR, mpu_dev_temp);
         if (result != RT_EOK)
         {
             LOG_E("device register err code: %d", result);
@@ -297,10 +297,6 @@ int rt_hw_mpu6xxx_init(const char *name, struct rt_sensor_config *cfg)
         }
     }
 #endif
-
-    sensor_acce->parent.user_data = mpu_dev_temp;
-    sensor_gyro->parent.user_data = mpu_dev_temp;
-    sensor_mag->parent.user_data  = mpu_dev_temp;
 
     LOG_I("sensor init success");
     return RT_EOK;
