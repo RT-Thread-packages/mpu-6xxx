@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2022, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -19,7 +19,7 @@
 
 #define MPU6XXX_ADDRESS_AD0_LOW                 0x68 // address pin low (GND), default for InvenSense evaluation board
 #define MPU6XXX_ADDRESS_AD0_HIGH                0x69 // address pin high (VCC)
-                                                
+
 #define MPU6XXX_RA_XG_OFFS_TC                   0x00 //[7]    PWR_MODE, [6:1] XG_OFFS_TC, [0] OTP_BNK_VLD
 #define MPU6XXX_RA_YG_OFFS_TC                   0x01 //[7]    PWR_MODE, [6:1] YG_OFFS_TC, [0] OTP_BNK_VLD
 #define MPU6XXX_RA_ZG_OFFS_TC                   0x02 //[7]    PWR_MODE, [6:1] ZG_OFFS_TC, [0] OTP_BNK_VLD
@@ -139,15 +139,15 @@
 #define MPU6XXX_TC_OFFSET_BIT                   6
 #define MPU6XXX_TC_OFFSET_LENGTH                6
 #define MPU6XXX_TC_OTP_BNK_VLD_BIT              0
-            
+
 #define MPU6XXX_VDDIO_LEVEL_VLOGIC              0
 #define MPU6XXX_VDDIO_LEVEL_VDD                 1
-        
+
 #define MPU6XXX_CFG_EXT_SYNC_SET_BIT            5
 #define MPU6XXX_CFG_EXT_SYNC_SET_LENGTH         3
 #define MPU6XXX_CFG_DLPF_CFG_BIT                2
 #define MPU6XXX_CFG_DLPF_CFG_LENGTH             3
-        
+
 #define MPU6XXX_EXT_SYNC_DISABLED               0x0
 #define MPU6XXX_EXT_SYNC_TEMP_OUT_L             0x1
 #define MPU6XXX_EXT_SYNC_GYRO_XOUT_L            0x2
@@ -156,7 +156,7 @@
 #define MPU6XXX_EXT_SYNC_ACCEL_XOUT_L           0x5
 #define MPU6XXX_EXT_SYNC_ACCEL_YOUT_L           0x6
 #define MPU6XXX_EXT_SYNC_ACCEL_ZOUT_L           0x7
-        
+
 #define MPU6XXX_DLPF_BW_256                     0x00
 #define MPU6XXX_DLPF_BW_188                     0x01
 #define MPU6XXX_DLPF_BW_98                      0x02
@@ -164,15 +164,15 @@
 #define MPU6XXX_DLPF_BW_20                      0x04
 #define MPU6XXX_DLPF_BW_10                      0x05
 #define MPU6XXX_DLPF_BW_5                       0x06
-        
+
 #define MPU6XXX_GCONFIG_FS_SEL_BIT              4
 #define MPU6XXX_GCONFIG_FS_SEL_LENGTH           2
-        
+
 #define MPU6XXX_GYRO_FS_250                     0x00
 #define MPU6XXX_GYRO_FS_500                     0x01
 #define MPU6XXX_GYRO_FS_1000                    0x02
 #define MPU6XXX_GYRO_FS_2000                    0x03
-    
+
 #define MPU6XXX_ACONFIG_XA_ST_BIT               7
 #define MPU6XXX_ACONFIG_YA_ST_BIT               6
 #define MPU6XXX_ACONFIG_ZA_ST_BIT               5
@@ -180,19 +180,19 @@
 #define MPU6XXX_ACONFIG_AFS_SEL_LENGTH          2
 #define MPU6XXX_ACONFIG_ACCEL_HPF_BIT           2
 #define MPU6XXX_ACONFIG_ACCEL_HPF_LENGTH        3
-    
+
 #define MPU6XXX_ACCEL_FS_2                      0x00
 #define MPU6XXX_ACCEL_FS_4                      0x01
 #define MPU6XXX_ACCEL_FS_8                      0x02
 #define MPU6XXX_ACCEL_FS_16                     0x03
-            
+
 #define MPU6XXX_DHPF_RESET                      0x00
 #define MPU6XXX_DHPF_5                          0x01
 #define MPU6XXX_DHPF_2P5                        0x02
 #define MPU6XXX_DHPF_1P25                       0x03
 #define MPU6XXX_DHPF_0P63                       0x04
 #define MPU6XXX_DHPF_HOLD                       0x07
-            
+
 #define MPU6XXX_TEMP_FIFO_EN_BIT                7
 #define MPU6XXX_XG_FIFO_EN_BIT                  6
 #define MPU6XXX_YG_FIFO_EN_BIT                  5
@@ -201,14 +201,14 @@
 #define MPU6XXX_SLV2_FIFO_EN_BIT                2
 #define MPU6XXX_SLV1_FIFO_EN_BIT                1
 #define MPU6XXX_SLV0_FIFO_EN_BIT                0
-            
+
 #define MPU6XXX_MULT_MST_EN_BIT                 7
 #define MPU6XXX_WAIT_FOR_ES_BIT                 6
 #define MPU6XXX_SLV_3_FIFO_EN_BIT               5
 #define MPU6XXX_I2C_MST_P_NSR_BIT               4
 #define MPU6XXX_I2C_MST_CLK_BIT                 3
 #define MPU6XXX_I2C_MST_CLK_LENGTH              4
-            
+
 #define MPU6XXX_CLOCK_DIV_348                   0x0
 #define MPU6XXX_CLOCK_DIV_333                   0x1
 #define MPU6XXX_CLOCK_DIV_320                   0x2
@@ -225,7 +225,7 @@
 #define MPU6XXX_CLOCK_DIV_400                   0xD
 #define MPU6XXX_CLOCK_DIV_381                   0xE
 #define MPU6XXX_CLOCK_DIV_364                   0xF
-            
+
 #define MPU6XXX_I2C_SLV_RW_BIT                  7
 #define MPU6XXX_I2C_SLV_ADDR_BIT                6
 #define MPU6XXX_I2C_SLV_ADDR_LENGTH             7
@@ -235,7 +235,7 @@
 #define MPU6XXX_I2C_SLV_GRP_BIT                 4
 #define MPU6XXX_I2C_SLV_LEN_BIT                 3
 #define MPU6XXX_I2C_SLV_LEN_LENGTH              4
-        
+
 #define MPU6XXX_I2C_SLV4_RW_BIT                 7
 #define MPU6XXX_I2C_SLV4_ADDR_BIT               6
 #define MPU6XXX_I2C_SLV4_ADDR_LENGTH            7
@@ -244,7 +244,7 @@
 #define MPU6XXX_I2C_SLV4_REG_DIS_BIT            5
 #define MPU6XXX_I2C_SLV4_MST_DLY_BIT            4
 #define MPU6XXX_I2C_SLV4_MST_DLY_LENGTH         5
-        
+
 #define MPU6XXX_MST_PASS_THROUGH_BIT            7
 #define MPU6XXX_MST_I2C_SLV4_DONE_BIT           6
 #define MPU6XXX_MST_I2C_LOST_ARB_BIT            5
@@ -253,7 +253,7 @@
 #define MPU6XXX_MST_I2C_SLV2_NACK_BIT           2
 #define MPU6XXX_MST_I2C_SLV1_NACK_BIT           1
 #define MPU6XXX_MST_I2C_SLV0_NACK_BIT           0
-    
+
 #define MPU6XXX_INTCFG_INT_LEVEL_BIT            7
 #define MPU6XXX_INTCFG_INT_OPEN_BIT             6
 #define MPU6XXX_INTCFG_LATCH_INT_EN_BIT         5
@@ -262,19 +262,19 @@
 #define MPU6XXX_INTCFG_FSYNC_INT_EN_BIT         2
 #define MPU6XXX_INTCFG_I2C_BYPASS_EN_BIT        1
 #define MPU6XXX_INTCFG_CLKOUT_EN_BIT            0
-    
+
 #define MPU6XXX_INTMODE_ACTIVEHIGH              0x00
 #define MPU6XXX_INTMODE_ACTIVELOW               0x01
-            
+
 #define MPU6XXX_INTDRV_PUSHPULL                 0x00
 #define MPU6XXX_INTDRV_OPENDRAIN                0x01
-            
+
 #define MPU6XXX_INTLATCH_50USPULSE              0x00
 #define MPU6XXX_INTLATCH_WAITCLEAR              0x01
-            
+
 #define MPU6XXX_INTCLEAR_STATUSREAD             0x00
 #define MPU6XXX_INTCLEAR_ANYREAD                0x01
-    
+
 #define MPU6XXX_INTERRUPT_FF_BIT                7
 #define MPU6XXX_INTERRUPT_MOT_BIT               6
 #define MPU6XXX_INTERRUPT_ZMOT_BIT              5
@@ -283,14 +283,14 @@
 #define MPU6XXX_INTERRUPT_PLL_RDY_INT_BIT       2
 #define MPU6XXX_INTERRUPT_DMP_INT_BIT           1
 #define MPU6XXX_INTERRUPT_DATA_RDY_BIT          0
-    
+
 #define MPU6XXX_DMPINT_5_BIT                    5
 #define MPU6XXX_DMPINT_4_BIT                    4
 #define MPU6XXX_DMPINT_3_BIT                    3
 #define MPU6XXX_DMPINT_2_BIT                    2
 #define MPU6XXX_DMPINT_1_BIT                    1
 #define MPU6XXX_DMPINT_0_BIT                    0
-        
+
 #define MPU6XXX_MOTION_MOT_XNEG_BIT             7
 #define MPU6XXX_MOTION_MOT_XPOS_BIT             6
 #define MPU6XXX_MOTION_MOT_YNEG_BIT             5
@@ -321,7 +321,7 @@
 #define MPU6XXX_DETECT_DECREMENT_1              0x1
 #define MPU6XXX_DETECT_DECREMENT_2              0x2
 #define MPU6XXX_DETECT_DECREMENT_4              0x3
-    
+
 #define MPU6XXX_USERCTRL_DMP_EN_BIT             7
 #define MPU6XXX_USERCTRL_FIFO_EN_BIT            6
 #define MPU6XXX_USERCTRL_I2C_MST_EN_BIT         5
@@ -330,14 +330,14 @@
 #define MPU6XXX_USERCTRL_FIFO_RESET_BIT         2
 #define MPU6XXX_USERCTRL_I2C_MST_RESET_BIT      1
 #define MPU6XXX_USERCTRL_SIG_COND_RESET_BIT     0
-    
+
 #define MPU6XXX_PWR1_DEVICE_RESET_BIT           7
 #define MPU6XXX_PWR1_SLEEP_BIT                  6
 #define MPU6XXX_PWR1_CYCLE_BIT                  5
 #define MPU6XXX_PWR1_TEMP_DIS_BIT               3
 #define MPU6XXX_PWR1_CLKSEL_BIT                 2
 #define MPU6XXX_PWR1_CLKSEL_LENGTH              3
-        
+
 #define MPU6XXX_CLOCK_INTERNAL                  0x00
 #define MPU6XXX_CLOCK_PLL_XGYRO                 0x01
 #define MPU6XXX_CLOCK_PLL_YGYRO                 0x02
@@ -345,7 +345,7 @@
 #define MPU6XXX_CLOCK_PLL_EXT32K                0x04
 #define MPU6XXX_CLOCK_PLL_EXT19M                0x05
 #define MPU6XXX_CLOCK_KEEP_RESET                0x07
-    
+
 #define MPU6XXX_PWR2_LP_WAKE_CTRL_BIT           7
 #define MPU6XXX_PWR2_LP_WAKE_CTRL_LENGTH        2
 #define MPU6XXX_PWR2_STBY_XA_BIT                5
@@ -354,17 +354,17 @@
 #define MPU6XXX_PWR2_STBY_XG_BIT                2
 #define MPU6XXX_PWR2_STBY_YG_BIT                1
 #define MPU6XXX_PWR2_STBY_ZG_BIT                0
-    
+
 #define MPU6XXX_WAKE_FREQ_1P25                  0x0
 #define MPU6XXX_WAKE_FREQ_2P5                   0x1
 #define MPU6XXX_WAKE_FREQ_5                     0x2
 #define MPU6XXX_WAKE_FREQ_10                    0x3
-    
+
 #define MPU6XXX_BANKSEL_PRFTCH_EN_BIT           6
 #define MPU6XXX_BANKSEL_CFG_USER_BANK_BIT       5
 #define MPU6XXX_BANKSEL_MEM_SEL_BIT             4
 #define MPU6XXX_BANKSEL_MEM_SEL_LENGTH          5
-    
+
 #define MPU6XXX_DMP_MEMORY_BANKS                8
 #define MPU6XXX_DMP_MEMORY_BANK_SIZE            256
 #define MPU6XXX_DMP_MEMORY_CHUNK_SIZE           16

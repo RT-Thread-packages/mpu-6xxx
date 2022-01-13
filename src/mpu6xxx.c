@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2022, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,7 +24,7 @@
 
 #ifdef PKG_USING_MPU6XXX_MAG
 #include "ak8963_reg.h"
-#endif 
+#endif
 
 #define MPU6XXX_ACCEL_SEN     (16384)
 #define MPU6XXX_GYRO_SEN      (1310)
@@ -265,7 +265,7 @@ static void mpu92_mag_write_reg(struct mpu6xxx_device *dev, rt_uint8_t addr, rt_
     mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV4_DO, data);
     mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV4_CTRL, MPU6500_I2C_SLVx_EN);
 
-    do 
+    do
     {
         mpu6xxx_read_regs(dev, MPU6XXX_RA_I2C_MST_STATUS, 1, &status);
         rt_thread_mdelay(1);
@@ -466,7 +466,7 @@ rt_err_t mpu6xxx_set_param(struct mpu6xxx_device *dev, enum mpu6xxx_cmd cmd, rt_
     case MPU6XXX_DLPF_CONFIG: /* Digital Low Pass Filter */
         res = mpu6xxx_write_bits(dev, MPU6XXX_RA_CONFIG, MPU6XXX_CFG_DLPF_CFG_BIT, MPU6XXX_CFG_DLPF_CFG_LENGTH, param);
         break;
-    case MPU6XXX_SAMPLE_RATE: /* Sample Rate —— 16-bit unsigned value.
+    case MPU6XXX_SAMPLE_RATE: /* Sample Rate = 16-bit unsigned value.
                                  Sample Rate = [1000 -  4]HZ when dlpf is enable
                                  Sample Rate = [8000 - 32]HZ when dlpf is disable */
 
@@ -536,7 +536,7 @@ rt_err_t mpu6xxx_get_accel(struct mpu6xxx_device *dev, struct mpu6xxx_3axes *acc
 
 /**
  * This function gets the data of the gyroscope, unit: deg/10s
- * Here deg/10s means 10 times higher precision than deg/s. 
+ * Here deg/10s means 10 times higher precision than deg/s.
  *
  * @param dev the pointer of device driver structure
  * @param gyro the pointer of 3axes structure for receive data
@@ -620,7 +620,7 @@ rt_err_t mpu6xxx_get_temp(struct mpu6xxx_device *dev, float *temp)
     }
     else
     {
-        /* mpu6500:  ((TEMP_OUT – RoomTemp_Offset)/Temp_Sensitivity)+ 21degC */
+        /* mpu6500:  ((TEMP_OUT - RoomTemp_Offset)/Temp_Sensitivity)+ 21degC */
         *temp = (double)tmp / MPU6500_TEMP_SEN + MPU6500_TEMP_OFFSET;
     }
 
