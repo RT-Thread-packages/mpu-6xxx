@@ -18,7 +18,7 @@
 
 static struct mpu6xxx_device *_mpu6xxx_init(struct rt_sensor_intf *intf)
 {
-    rt_uint8_t  i2c_addr = (rt_uint32_t)(intf->user_data) & 0xff;
+    rt_uint8_t  i2c_addr = (rt_uint32_t)(intf->arg) & 0xff;
 
     return mpu6xxx_init(intf->dev_name, i2c_addr);
 }
