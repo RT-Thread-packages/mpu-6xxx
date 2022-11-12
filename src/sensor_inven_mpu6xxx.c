@@ -181,9 +181,6 @@ static rt_err_t mpu6xxx_control(struct rt_sensor_device *sensor, int cmd, void *
     case RT_SENSOR_CTRL_SET_RANGE:
         result = _mpu6xxx_set_range(sensor, (rt_int32_t)args);
         break;
-    case RT_SENSOR_CTRL_SET_ODR:
-        result = -RT_EINVAL;
-        break;
     case RT_SENSOR_CTRL_SET_MODE:
         result = _mpu6xxx_acc_set_mode(sensor, (rt_uint32_t)args & 0xff);
         break;
@@ -191,9 +188,9 @@ static rt_err_t mpu6xxx_control(struct rt_sensor_device *sensor, int cmd, void *
         result = _mpu6xxx_set_power(sensor, (rt_uint32_t)args & 0xff);
         break;
     case RT_SENSOR_CTRL_SELF_TEST:
-        break;
+    case RT_SENSOR_CTRL_SET_ODR:
     default:
-        return -RT_ERROR;
+        return -RT_EINVAL;
     }
     return result;
 }
