@@ -51,7 +51,7 @@
  */
 static rt_err_t mpu6xxx_write_reg(struct mpu6xxx_device *dev, rt_uint8_t reg, rt_uint8_t data)
 {
-    rt_int8_t res = 0;
+    rt_err_t res = 0;
 #ifdef RT_USING_I2C
     struct rt_i2c_msg msgs;
     rt_uint8_t buf[2] = {reg, data};
@@ -95,7 +95,7 @@ static rt_err_t mpu6xxx_write_reg(struct mpu6xxx_device *dev, rt_uint8_t reg, rt
  */
 static rt_err_t mpu6xxx_read_regs(struct mpu6xxx_device *dev, rt_uint8_t reg, rt_uint8_t len, rt_uint8_t *buf)
 {
-    rt_int8_t res = 0;
+    rt_err_t res = 0;
 #ifdef RT_USING_I2C
     struct rt_i2c_msg msgs[2];
 #endif
