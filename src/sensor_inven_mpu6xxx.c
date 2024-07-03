@@ -18,7 +18,11 @@
 
 static struct mpu6xxx_device *_mpu6xxx_init(struct rt_sensor_intf *intf)
 {
+#if defined(RT_VERSION_CHECK) && (RTTHREAD_VERSION >= RT_VERSION_CHECK(5, 0, 1))
+    rt_uint8_t  i2c_addr = (rt_uint32_t)(intf->user_data) & 0xff;
+#else
     rt_uint8_t  i2c_addr = (rt_uint32_t)(intf->arg) & 0xff;
+#endif
 
     return mpu6xxx_init(intf->dev_name, i2c_addr);
 }
@@ -155,6 +159,21 @@ static rt_size_t _mpu6xxx_polling_get_data(rt_sensor_t sensor, struct rt_sensor_
     return 1;
 }
 
+#if defined(RT_VERSION_CHECK) && (RTTHREAD_VERSION >= RT_VERSION_CHECK(5, 0, 1))
+static rt_ssize_t mpu6xxx_fetch_data(struct rt_sensor_device *sensor,struct rt_sensor_data *data, rt_size_t len)
+{
+    RT_ASSERT(data);
+
+    if (sensor->config.mode == RT_SENSOR_MODE_POLLING)
+    {
+        return _mpu6xxx_polling_get_data(sensor, data);
+    }
+    else
+    {
+        return -RT_EINVAL;
+    }
+}
+#else
 static rt_ssize_t mpu6xxx_fetch_data(struct rt_sensor_device *sensor, rt_sensor_data_t buf, rt_size_t len)
 {
     RT_ASSERT(buf);
@@ -168,6 +187,7 @@ static rt_ssize_t mpu6xxx_fetch_data(struct rt_sensor_device *sensor, rt_sensor_
         return -RT_EINVAL;
     }
 }
+#endif
 
 static rt_err_t mpu6xxx_control(struct rt_sensor_device *sensor, int cmd, void *args)
 {
